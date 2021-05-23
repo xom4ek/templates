@@ -1,0 +1,91 @@
+include:
+  - presets.yaml
+
+.docker_build:
+  variables:
+    DOCKER_BUILDKIT: 1
+    DOCKERFILE: ./Dockerfile
+  extends: .docker-full
+  stage: build
+  image: docker
+  tags:
+    - build
+  script:
+    - set -x
+    - |
+      if ! docker info &>/dev/null; then
+        if [ -z "$DOCKER_HOST" ] && [ "$KUBERNETES_PORT" ]; then
+          export DOCKER_HOST='tcp://localhost:2375'
+        fi
+      fi
+    - |
+      if [[ -f $DOCKERFILE ]]; then
+          DOCKERFILE_NAME=${DOCKERFILE##*/}
+          DOCKERFILE_DIR=${DOCKERFILE%/*}
+          if [ -z "$image_postfix" ]; then
+              image_postfix=${DOCKERFILE_NAME%.*}
+              if [ $image_postfix == "Dockerfile" ] || [ $image_postfix == "dockerfile" ] ; then
+              image_postfix=""
+              fi
+          fi
+        echo "Building Dockerfile-based application with dockerfile ${DOCKERFILE_NAME} and image_postfix $image_postfix into dir ${DOCKERFILE_DIR}"
+      else
+        echo "No Dockerfile in env - check env"
+        exit 1
+      fi
+    - |
+      DOCKERFILE_NAME=${DOCKERFILE##*/}
+      DOCKERFILE_DIR=${DOCKERFILE%/*}
+      if [ -z "$image_postfix" ]; then
+          image_postfix=${DOCKERFILE_NAME%.*}
+          if [ $image_postfix == "Dockerfile" ] || [ $image_postfix == "dockerfile" ] ; then
+          image_postfix=""
+          fi
+      fi
+    - CI_APP_REGISTRY=$CI_REGISTRY_IMAGE$image_postfix
+    - |
+      if [ -n "${BUILD_MULTISTAGE+set}" ] ; then
+        image_builder_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHA-builder"
+        image_builder_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHA-builder"
+        image_builder_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_NAME-builder"
+        if [[ -z "$CI_COMMIT_TAG" ]]; then
+          image_builder_tagged=$image_builder_sha
+        else
+          image_builder_tagged=$image_builder_ref
+        fi
+        docker image pull "$image_builder_before" || \
+        docker image pull "$image_builder_ref" || \
+        true
+        docker build \
+          --cache-from "$image_builder_before" \
+          --cache-from "$image_builder_ref" \
+          $BUILD_EXTRA_ARGS \
+          --tag "$image_builder_tagged" \
+          --tag "$image_builder_ref" \
+          --file $DOCKERFILE .
+      fi
+    - image_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHA"
+    - image_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHA"
+    - image_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_NAME"
+    - image_latest="$CI_APP_REGISTRY:latest"
+    - |
+      if [[ -z "$CI_COMMIT_TAG" ]]; then
+        image_tagged=$image_sha
+      else
+        image_tagged=$image_ref
+      fi
+    - |
+      docker build \
+        --cache-from "$image_before" \
+        --cache-from "$image_ref" \
+        $BUILD_EXTRA_ARGS \
+        --tag "$image_tagged" \
+        --tag "$image_ref" \
+        --file $DOCKERFILE .
+    - docker push "$image_tagged"
+    - docker push "$image_ref"
+    - |
+      if [ "$CI_COMMIT_REF_NAME" = "main" ] || [ "$CI_COMMIT_REF_NAME" = "master" ] || [ -n "$CI_COMMIT_TAG" ]; then
+        docker tag "$image_tagged" "$image_latest"
+        docker push "$image_latest"
+      fi
