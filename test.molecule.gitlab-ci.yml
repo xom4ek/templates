@@ -25,7 +25,7 @@ stages:
 molecule-role-common:
   extends:
     - .docker-full
-  image: $CI_TOOLS_REGISTRY/ansible-toolsets
+  image: $CI_TOOLS_REGISTRY/ansible-toolset
   stage: test
   tags:
     - test
