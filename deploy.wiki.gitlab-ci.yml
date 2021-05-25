@@ -1,0 +1,32 @@
+---
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+
+wiki-test:
+  image: $CI_TOOLS_REGISTRY/wiki
+  stage: test
+  allow_failure: true
+  script:
+  - mkdocs build --strict --verbose --site-dir test
+  artifacts:
+    paths:
+    - test
+  except:
+  - master
+
+pages:
+  image: $CI_TOOLS_REGISTRY/wiki
+  stage: deploy
+  allow_failure: true
+  script:
+  - mkdocs build
+  artifacts:
+    paths:
+    - public
+  only:
+  - master

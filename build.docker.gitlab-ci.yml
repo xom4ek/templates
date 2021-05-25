@@ -1,17 +1,33 @@
-include:
-  - presets.yaml
+---
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+
+.docker_login:
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    #- docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD_GITLAB $CI_REGISTRY_GITLAB
+
+.docker-full:
+  before_script:
+    - !reference [.docker_login, before_script]
 
 .docker_build:
   variables:
-    DOCKER_BUILDKIT: 1
+    DOCKER_BUILDKIT: 0
     DOCKERFILE: ./Dockerfile
+    BUILD_MULTISTAGE: 1
   extends: .docker-full
   stage: build
-  image: docker
+  image: $CI_TOOLS_REGISTRY/docker
   tags:
     - build
   script:
-    - set -x
+    # - set -vx
     - |
       if ! docker info &>/dev/null; then
         if [ -z "$DOCKER_HOST" ] && [ "$KUBERNETES_PORT" ]; then
@@ -19,35 +35,24 @@ include:
         fi
       fi
     - |
-      if [[ -f $DOCKERFILE ]]; then
-          DOCKERFILE_NAME=${DOCKERFILE##*/}
-          DOCKERFILE_DIR=${DOCKERFILE%/*}
-          if [ -z "$image_postfix" ]; then
-              image_postfix=${DOCKERFILE_NAME%.*}
-              if [ $image_postfix == "Dockerfile" ] || [ $image_postfix == "dockerfile" ] ; then
-              image_postfix=""
-              fi
-          fi
-        echo "Building Dockerfile-based application with dockerfile ${DOCKERFILE_NAME} and image_postfix $image_postfix into dir ${DOCKERFILE_DIR}"
-      else
-        echo "No Dockerfile in env - check env"
-        exit 1
-      fi
-    - |
       DOCKERFILE_NAME=${DOCKERFILE##*/}
       DOCKERFILE_DIR=${DOCKERFILE%/*}
       if [ -z "$image_postfix" ]; then
-          image_postfix=${DOCKERFILE_NAME%.*}
-          if [ $image_postfix == "Dockerfile" ] || [ $image_postfix == "dockerfile" ] ; then
+          image_postfix="/${DOCKERFILE_NAME%.*}"
+          if [ $image_postfix == "/Dockerfile" ] || [ $image_postfix == "/dockerfile" ] ; then
           image_postfix=""
           fi
       fi
+    - env
+    - echo $DOCKERFILE_DIR
+    - echo $DOCKERFILE_NAME
+    - echo $image_postfix
     - CI_APP_REGISTRY=$CI_REGISTRY_IMAGE$image_postfix
     - |
-      if [ -n "${BUILD_MULTISTAGE+set}" ] ; then
+      if [ "${BUILD_MULTISTAGE}" == "1"  ] ; then
         image_builder_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHA-builder"
         image_builder_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHA-builder"
-        image_builder_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_NAME-builder"
+        image_builder_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_SLUG-builder"
         if [[ -z "$CI_COMMIT_TAG" ]]; then
           image_builder_tagged=$image_builder_sha
         else
@@ -59,14 +64,18 @@ include:
         docker build \
           --cache-from "$image_builder_before" \
           --cache-from "$image_builder_ref" \
+          --target builder \
           $BUILD_EXTRA_ARGS \
           --tag "$image_builder_tagged" \
           --tag "$image_builder_ref" \
           --file $DOCKERFILE .
+          docker push "$image_builder_tagged"
+          docker push "$image_builder_ref"
+        BUILD_EXTRA_ARGS="$BUILD_EXTRA_ARGS --cache-from \"$image_builder_ref\""
       fi
     - image_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHA"
     - image_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHA"
-    - image_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_NAME"
+    - image_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_SLUG"
     - image_latest="$CI_APP_REGISTRY:latest"
     - |
       if [[ -z "$CI_COMMIT_TAG" ]]; then
@@ -81,11 +90,14 @@ include:
         $BUILD_EXTRA_ARGS \
         --tag "$image_tagged" \
         --tag "$image_ref" \
-        --file $DOCKERFILE .
+        --file $DOCKERFILE $DOCKERFILE_DIR
     - docker push "$image_tagged"
     - docker push "$image_ref"
     - |
-      if [ "$CI_COMMIT_REF_NAME" = "main" ] || [ "$CI_COMMIT_REF_NAME" = "master" ] || [ -n "$CI_COMMIT_TAG" ]; then
+      if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ] || [ -n "$CI_COMMIT_TAG" ]; then
         docker tag "$image_tagged" "$image_latest"
         docker push "$image_latest"
       fi
+
+build:
+  extends: .docker_build

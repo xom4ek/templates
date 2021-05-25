@@ -1,0 +1,129 @@
+---
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+
+.helm_pulbish_chart:
+  image: $CI_TOOLS_REGISTRY/helm
+  stage: build
+  tags:
+    - build
+  script:
+    - helm repo add private ${CI_CHART_REGISTRY}
+    - chart_sha="1.0.0-sha$CI_COMMIT_SHORT_SHA"
+    - chart_ref="1.0.0-$CI_COMMIT_REF_SLUG"
+    - CHART_DIR=".helm/release"
+    - helm dependency update $CHART_DIR
+    - helm lint $CHART_DIR || true
+    - |
+      if [[ "$CI_COMMIT_REF_SLUG" != "master" ]] && [[ "$CI_COMMIT_REF_SLUG" != "develop" ]]; then
+        CHART_DIR=".helm/preview"
+        helm dependency update .helm/preview
+        helm lint $CHART_DIR || true
+      fi;
+    - helm push ${CHART_DIR} --version ${chart_sha} ${CI_CHART_REGISTRY}
+    - helm push ${CHART_DIR} --version ${chart_ref} ${CI_CHART_REGISTRY}
+
+chart_release:
+  extends: .helm_pulbish_chart
+
+.helm_deploy_chart:
+  image: $CI_TOOLS_REGISTRY/helm
+  stage: deploy
+  script:
+    - helm repo add private ${CI_CHART_REGISTRY}
+    - |
+      if [[ "$CI_COMMIT_REF_SLUG" == "master" ]]; then
+          KUBE_NAMESPACE=production
+          ENVIRONMENT=production
+          HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.image.tag=$CI_COMMIT_SHA "
+          HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
+          HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
+      elif [[ "$CI_COMMIT_REF_SLUG" == "develop" ]]; then
+          KUBE_NAMESPACE=staging
+          ENVIRONMENT=staging
+          HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.image.tag=$CI_COMMIT_SHA --set global.ingress.stagingDomain=$KUBE_BASE_DOMAIN "
+          HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
+          HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
+      else
+          KUBE_NAMESPACE=$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
+          ENVIRONMENT=preview
+          HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.image.tag=$CI_COMMIT_SHA --set global.ingress.stagingDomain=$CI_COMMIT_REF_SLUG.$KUBE_BASE_DOMAIN "
+          HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
+          HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
+
+      fi;
+    - HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set global.imageCredentials.username=${CI_REGISTRY_USER} --set global.imageCredentials.password=${CI_REGISTRY_PASSWORD} --set global.environment=${ENVIRONMENT} "
+    - helm upgrade \
+        --install $CI_PROJECT_PATH_SLUG \
+        private/$CI_PROJECT_PATH_SLUG \
+        --version 1.0.0-sha$CI_COMMIT_SHORT_SHA \
+        --namespace ${KUBE_NAMESPACE} \
+        --create-namespace \
+        --atomic \
+        --timeout 5m \
+        $HELM_EXTRA_ARGS
+    - DYNAMIC_ENVIRONMENT_URL=$(helm get notes $CI_PROJECT_PATH_SLUG --namespace ${KUBE_NAMESPACE} | grep -Eo "(http|https)://.+" | tail -1)
+    - echo "DYNAMIC_ENVIRONMENT_URL=$DYNAMIC_ENVIRONMENT_URL" >> deploy.env
+    - echo "KUBE_NAMESPACE=$KUBE_NAMESPACE" >> deploy.env
+  artifacts:
+    reports:
+      dotenv: deploy.env
+
+deploy_review:
+  extends: .helm_deploy_chart
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    url: $DYNAMIC_ENVIRONMENT_URL
+    on_stop: stop_review
+    auto_stop_in: 1 week
+    kubernetes:
+      namespace: $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
+  only:
+    - /^feature.*$/
+  except:
+    - master
+    - develop
+
+stop_review:
+  image: $CI_TOOLS_REGISTRY/helm
+  variables:
+    GIT_STRATEGY: none
+  when: manual
+  stage: deploy
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    action: stop
+  artifacts:
+    reports:
+      dotenv: deploy.env
+  allow_failure: true
+  script:
+    - helm uninstall $CI_PROJECT_PATH_SLUG --namespace $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
+    - kubectl delete namespace $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
+  only:
+    - /^feature.*$/
+
+deploy_staging:
+  extends: .helm_deploy_chart
+  environment:
+    name: staging
+    url: $DYNAMIC_ENVIRONMENT_URL
+    kubernetes:
+      namespace: staging
+  only:
+    - develop
+
+deploy_production:
+  extends: .helm_deploy_chart
+  environment:
+    name: production
+    url: $DYNAMIC_ENVIRONMENT_URL
+    kubernetes:
+      namespace: production
+  only:
+    - master
