@@ -32,4 +32,6 @@ molecule-role-common:
   variables:
     PY_COLORS: 1
   script:
+    - cp $ANSIBLE_SSH_KEY ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
     - molecule test
