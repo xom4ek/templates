@@ -12,21 +12,21 @@ wiki-test:
   stage: test
   allow_failure: true
   script:
-  - mkdocs build --strict --verbose --site-dir test
+    - mkdocs build --strict --verbose --site-dir test
   artifacts:
     paths:
-    - test
+      - test
   except:
-  - master
+    - master
 
 pages:
   image: $CI_TOOLS_REGISTRY/wiki
   stage: deploy
   allow_failure: true
   script:
-  - mkdocs build
+    - mkdocs build
   artifacts:
     paths:
-    - public
+      - public
   only:
-  - master
+    - master
