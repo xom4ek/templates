@@ -1,9 +1,7 @@
 yamllint:
   image: $CI_TOOLS_REGISTRY/ansible-toolset
   stage: test
-  tags:
-    - test
   variables:
     PY_COLORS: 1
   script:
-    - yamllint . 
+    - yamllint .

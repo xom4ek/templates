@@ -54,6 +54,7 @@ stages:
     - echo $DOCKERFILE_NAME
     - echo $image_postfix
     - CI_APP_REGISTRY=$CI_REGISTRY_IMAGE$image_postfix
+    - BUILD_EXTRA_ARGS="$BUILD_EXTRA_ARGS --build-arg SSH_KEY=$GITLAB_SSH_KEY"
     - |
       if [ "${BUILD_MULTISTAGE}" == "1"  ] ; then
         image_builder_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHA-builder"
