@@ -1,5 +1,6 @@
+---
 .ans-validate:
-  image: $CI_TOOLS_REGISTRY/ansible-toolset:latest
+  image: $CI_TOOLS_REGISTRY/ansible-toolset
   stage: validate
   script:
     - chmod 600 $ANSIBLE_SSH_KEY
@@ -15,7 +16,7 @@
 
 .ans-plan:
   stage: plan
-  image: $CI_TOOLS_REGISTRY/ansible-toolset:latest
+  image: $CI_TOOLS_REGISTRY/ansible-toolset
   script:
     - chmod 600 $ANSIBLE_SSH_KEY
     - mkdir -p ~/.ssh

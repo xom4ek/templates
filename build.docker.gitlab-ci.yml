@@ -33,7 +33,6 @@ stages:
   tags:
     - build
   script:
-    # - set -vx
     - |
       if ! docker info &>/dev/null; then
         if [ -z "$DOCKER_HOST" ] && [ "$KUBERNETES_PORT" ]; then
@@ -49,12 +48,10 @@ stages:
           image_postfix=""
           fi
       fi
-    - env
     - echo $DOCKERFILE_DIR
     - echo $DOCKERFILE_NAME
     - echo $image_postfix
     - CI_APP_REGISTRY=$CI_REGISTRY_IMAGE$image_postfix
-    - BUILD_EXTRA_ARGS="$BUILD_EXTRA_ARGS --build-arg SSH_KEY=$GITLAB_SSH_KEY"
     - |
       if [ "${BUILD_MULTISTAGE}" == "1"  ] ; then
         image_builder_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHA-builder"
@@ -72,6 +69,7 @@ stages:
           --cache-from "$image_builder_before" \
           --cache-from "$image_builder_ref" \
           --target builder \
+          --build-arg SSH_KEY="$GITLAB_SSH_KEY" \
           $BUILD_EXTRA_ARGS \
           --tag "$image_builder_tagged" \
           --tag "$image_builder_ref" \
@@ -94,6 +92,7 @@ stages:
       docker build \
         --cache-from "$image_before" \
         --cache-from "$image_ref" \
+          --build-arg SSH_KEY="$GITLAB_SSH_KEY" \
         $BUILD_EXTRA_ARGS \
         --tag "$image_tagged" \
         --tag "$image_ref" \
