@@ -24,6 +24,8 @@ pages:
   stage: deploy
   allow_failure: true
   script:
+    - env
+    - envsubst < mkdocs.yml > mkdocs.tmp.yml && mv mkdocs.tmp.yml mkdocs.yml
     - mkdocs build
   artifacts:
     paths:
