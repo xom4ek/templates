@@ -1,0 +1,7 @@
+---
+site_name: templates
+site_url: $CI_PAGES_URL
+site_dir: public
+docs_dir: wiki
+theme: material
+nav: []

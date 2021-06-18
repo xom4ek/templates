@@ -7,6 +7,9 @@ stages:
   - release
   - deploy
 
+include:
+  - build.helm.gitlab-ci.yml
+
 .helm_pulbish_chart:
   image: $CI_TOOLS_REGISTRY/helm
   stage: build

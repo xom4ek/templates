@@ -1,7 +1,14 @@
+---
 yamllint:
   image: $CI_TOOLS_REGISTRY/ansible-toolset
   stage: test
+  allow_failure: true
   variables:
     PY_COLORS: 1
   script:
     - yamllint .
+
+include:
+  - project: 'ci-cd/templates'
+    ref: master
+    file: 'deploy.wiki.gitlab-ci.yml'
