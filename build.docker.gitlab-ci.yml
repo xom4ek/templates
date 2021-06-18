@@ -31,7 +31,7 @@ stages:
   stage: build
   image: $CI_TOOLS_REGISTRY/docker
   tags:
-    - build
+    - docker
   script:
     - |
       if ! docker info &>/dev/null; then
