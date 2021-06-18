@@ -9,6 +9,6 @@ yamllint:
     - yamllint .
 
 include:
-  - project: 'ci-cd/templates'
+  - project: '$CI_CD_PROJECT/templates'
     ref: master
     file: 'deploy.wiki.gitlab-ci.yml'
