@@ -13,7 +13,20 @@ wiki-test:
   stage: test
   allow_failure: true
   script:
+    - envsubst < mkdocs.yml > mkdocs.tmp.yml && mv mkdocs.tmp.yml mkdocs.yml
     - mkdocs build --strict --verbose --site-dir test
+  artifacts:
+    paths:
+      - test
+  except:
+    - master
+
+wiki-test-all-in-cli:
+  image: $CI_TOOLS_REGISTRY/wiki
+  stage: test
+  allow_failure: true
+  script:
+    - mkdocs build --strict --verbose --site-dir test --site_name $CI_PROJECT_PATH_SLUG --site_url $CI_PAGES_URL --docs_dir wiki --theme material
   artifacts:
     paths:
       - test
@@ -25,7 +38,6 @@ pages:
   stage: deploy
   allow_failure: true
   script:
-    - env
     - envsubst < mkdocs.yml > mkdocs.tmp.yml && mv mkdocs.tmp.yml mkdocs.yml
     - mkdocs build
   artifacts:
