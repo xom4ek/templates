@@ -126,7 +126,7 @@ stop_compose:
   only:
     - /^feature.*$/
 
-deploy_compose:
+deploy_compose_staging:
   extends: .compose_deploy
   environment:
     name: staging
@@ -137,7 +137,7 @@ deploy_compose:
   only:
     - develop
 
-deploy_compose:
+deploy_compose_production:
   extends: .compose_deploy
   environment:
     name: production
