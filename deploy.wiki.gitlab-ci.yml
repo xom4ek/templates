@@ -21,18 +21,6 @@ wiki-test:
   except:
     - master
 
-wiki-test-all-in-cli:
-  image: $CI_TOOLS_REGISTRY/wiki
-  stage: test
-  allow_failure: true
-  script:
-    - mkdocs build --strict --verbose --site-dir test --site-name $CI_PROJECT_PATH_SLUG --site-url $CI_PAGES_URL --docs-dir wiki --theme material
-  artifacts:
-    paths:
-      - test
-  except:
-    - master
-
 pages:
   image: $CI_TOOLS_REGISTRY/wiki
   stage: deploy
