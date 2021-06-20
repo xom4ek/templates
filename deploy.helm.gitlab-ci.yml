@@ -83,7 +83,7 @@ chart_release:
 deploy_helm:
   extends: .helm_deploy_chart
   environment:
-    name: review/$CI_COMMIT_REF_SLUG
+    name: review-k8s/$CI_COMMIT_REF_SLUG
     url: $DYNAMIC_ENVIRONMENT_URL
     on_stop: stop_helm
     auto_stop_in: 1 week
@@ -102,7 +102,7 @@ stop_helm:
   when: manual
   stage: cleanup
   environment:
-    name: review/$CI_COMMIT_REF_SLUG
+    name: review-k8s/$CI_COMMIT_REF_SLUG
     action: stop
   artifacts:
     reports:
@@ -117,7 +117,7 @@ stop_helm:
 deploy_helm_staging:
   extends: .helm_deploy_chart
   environment:
-    name: staging
+    name: staging-k8s
     url: $DYNAMIC_ENVIRONMENT_URL
     kubernetes:
       namespace: staging
@@ -127,7 +127,7 @@ deploy_helm_staging:
 deploy_helm_production:
   extends: .helm_deploy_chart
   environment:
-    name: production
+    name: production-k8s
     url: $DYNAMIC_ENVIRONMENT_URL
     kubernetes:
       namespace: production
