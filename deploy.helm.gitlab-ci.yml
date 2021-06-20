@@ -6,6 +6,7 @@ stages:
   - analyse
   - release
   - deploy
+  - cleanup
 
 include:
   - build.helm.gitlab-ci.yml
@@ -99,7 +100,7 @@ stop_helm:
   variables:
     GIT_STRATEGY: none
   when: manual
-  stage: deploy
+  stage: cleanup
   environment:
     name: review/$CI_COMMIT_REF_SLUG
     action: stop

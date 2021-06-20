@@ -6,6 +6,7 @@ stages:
   - analyse
   - release
   - deploy
+  - cleanup
 
 .helm_pulbish_chart:
   image: $CI_TOOLS_REGISTRY/helm

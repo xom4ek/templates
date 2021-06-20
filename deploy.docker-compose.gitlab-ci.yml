@@ -6,6 +6,7 @@ stages:
   - analyse
   - release
   - deploy
+  - cleanup
 
 .compose_deploy:
   image: $CI_TOOLS_REGISTRY/docker-compose
@@ -109,7 +110,7 @@ stop_compose:
   variables:
     GIT_STRATEGY: none
   when: manual
-  stage: deploy
+  stage: cleanup
   environment:
     name: review/$CI_COMMIT_REF_SLUG
     action: stop

@@ -6,6 +6,7 @@ stages:
   - analyse
   - release
   - deploy
+  - cleanup
 
 .docker_login:
   before_script:
