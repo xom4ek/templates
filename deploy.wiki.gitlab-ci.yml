@@ -26,7 +26,7 @@ wiki-test-all-in-cli:
   stage: test
   allow_failure: true
   script:
-    - mkdocs build --strict --verbose --site-dir test --site_name $CI_PROJECT_PATH_SLUG --site_url $CI_PAGES_URL --docs_dir wiki --theme material
+    - mkdocs build --strict --verbose --site-dir test --site-name $CI_PROJECT_PATH_SLUG --site-url $CI_PAGES_URL --docs-dir wiki --theme material
   artifacts:
     paths:
       - test
