@@ -77,12 +77,12 @@ chart_release:
     reports:
       dotenv: deploy.env
 
-deploy_review:
+deploy_helm:
   extends: .helm_deploy_chart
   environment:
     name: review/$CI_COMMIT_REF_SLUG
     url: $DYNAMIC_ENVIRONMENT_URL
-    on_stop: stop_review
+    on_stop: stop_helm
     auto_stop_in: 1 week
     kubernetes:
       namespace: $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
@@ -92,7 +92,7 @@ deploy_review:
     - master
     - develop
 
-stop_review:
+stop_helm:
   image: $CI_TOOLS_REGISTRY/helm
   variables:
     GIT_STRATEGY: none
@@ -111,7 +111,7 @@ stop_review:
   only:
     - /^feature.*$/
 
-deploy_staging:
+deploy_helm_staging:
   extends: .helm_deploy_chart
   environment:
     name: staging
@@ -121,7 +121,7 @@ deploy_staging:
   only:
     - develop
 
-deploy_production:
+deploy_helm_production:
   extends: .helm_deploy_chart
   environment:
     name: production
