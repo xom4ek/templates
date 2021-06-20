@@ -23,7 +23,11 @@ stages:
       echo IMAGE=$IMAGE
     - |
       if [[ -z "$COMPOSE_PROJECT_NAME" ]]; then
-        export COMPOSE_PROJECT_NAME=$CI_PROJECT_PATH_SLUG
+        if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
+          export COMPOSE_PROJECT_NAME=$CI_PROJECT_PATH_SLUG
+        else
+          export COMPOSE_PROJECT_NAME=$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
+        fi
       else
         echo already set COMPOSE_PROJECT_NAME
       fi
@@ -86,6 +90,8 @@ stages:
     - echo "DYNAMIC_ENVIRONMENT_URL=$DYNAMIC_ENVIRONMENT_URL" >> deploy.env
     - echo "DOCKER_HOSTS=$DOCKER_HOSTS" >> deploy.env
     - echo "COMPOSE_FILE=$COMPOSE_FILE" >> deploy.env
+    - echo "IMAGE=$IMAGE" >> deploy.env
+    - echo "DOMAIN=$DOMAIN" >> deploy.env
   artifacts:
     reports:
       dotenv: deploy.env
