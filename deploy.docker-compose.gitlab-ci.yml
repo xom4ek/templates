@@ -116,7 +116,7 @@ stages:
 deploy_compose:
   extends: .compose_deploy
   environment:
-    name: review-compose/$CI_COMMIT_REF_SLUG
+    name: review/compose/$CI_COMMIT_REF_SLUG
     url: $DYNAMIC_ENVIRONMENT_URL
     on_stop: stop_compose
     auto_stop_in: 1 week
