@@ -131,7 +131,6 @@ deploy_compose:
   environment:
     name: staging
     url: $DYNAMIC_ENVIRONMENT_URL
-    on_stop: stop_compose
     auto_stop_in: 1 week
     kubernetes:
       namespace: $DOCKER_HOSTS
@@ -143,7 +142,6 @@ deploy_compose:
   environment:
     name: production
     url: $DYNAMIC_ENVIRONMENT_URL
-    on_stop: stop_compose
     auto_stop_in: 1 week
     kubernetes:
       namespace: $DOCKER_HOSTS
