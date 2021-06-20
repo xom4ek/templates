@@ -51,11 +51,12 @@ stages:
     - echo $DOCKERFILE_DIR
     - echo $DOCKERFILE_NAME
     - echo $image_postfix
-    - CI_APP_REGISTRY=$CI_REGISTRY_IMAGE$image_postfix
+    - export CI_APP_REGISTRY=$CI_REGISTRY_IMAGE$image_postfix
+    - export CI_COMMIT_BEFORE_SHORT_SHA=$(echo $CI_COMMIT_BEFORE_SHA | head -c8)
     - |
       if [ "${BUILD_MULTISTAGE}" == "1"  ] ; then
-        image_builder_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHA-builder"
-        image_builder_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHA-builder"
+        image_builder_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHORT_SHA-builder"
+        image_builder_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHORT_SHA-builder"
         image_builder_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_SLUG-builder"
         if [[ -z "$CI_COMMIT_TAG" ]]; then
           image_builder_tagged=$image_builder_sha
@@ -78,9 +79,8 @@ stages:
           docker push "$image_builder_ref"
         BUILD_EXTRA_ARGS="$BUILD_EXTRA_ARGS --cache-from \"$image_builder_ref\""
       fi
-    - image_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHA"
-    - image_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHA"
-    - image_short_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHORT_SHA"
+    - image_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHORT_SHA"
+    - image_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHORT_SHA"
     - image_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_SLUG"
     - image_latest="$CI_APP_REGISTRY:latest"
     - |
@@ -100,7 +100,6 @@ stages:
         --file $DOCKERFILE $DOCKERFILE_DIR
     - docker push "$image_tagged"
     - docker push "$image_ref"
-    - docker push "$image_short_sha"
     - |
       if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ] || [ -n "$CI_COMMIT_TAG" ]; then
         docker tag "$image_tagged" "$image_latest"
