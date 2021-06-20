@@ -1,5 +1,5 @@
 variables:
-  REBUIILD_MYSQL:
+  REBUILD_MYSQL:
     value: "false"
     description: "If you want rebuild (TAKE A LONG TIME) mysql - set to true🌈"
   DROP_MYSQL:
@@ -12,7 +12,7 @@ rebuild-mysql:
     project: '$CI_MYSQL_PROJECT'
     strategy: depend
   rules:
-    - if: '$REBUIILD_MYSQL == "true"'
+    - if: '$REBUILD_MYSQL == "true"'
 
 drop-mysql:
   image: $CI_TOOLS_REGISTRY/docker-compose
