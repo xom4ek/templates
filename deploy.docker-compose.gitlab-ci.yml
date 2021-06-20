@@ -1,3 +1,151 @@
-###
-### STEAL WORK ABOUT IT
-###
+---
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+
+.compose_deploy:
+  image: $CI_TOOLS_REGISTRY/docker-compose
+  stage: deploy
+  tags:
+    - deploy
+  script:
+    - |
+      if [[ -z "$IMAGE" ]]; then
+        export IMAGE=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+      else
+        echo already set IMAGE
+      fi
+      echo IMAGE=$IMAGE
+    - |
+      if [[ -z "$COMPOSE_PROJECT_NAME" ]]; then
+        export COMPOSE_PROJECT_NAME=$CI_PROJECT_PATH_SLUG
+      else
+        echo already set COMPOSE_PROJECT_NAME
+      fi
+      echo COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME
+    - |
+      if [[ -z "$COMPOSE_FILE" ]]; then
+        if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
+          export COMPOSE_FILE=docker-compose.prod.yaml
+        elif [ "$CI_COMMIT_REF_SLUG" = "develop" ]; then
+          export COMPOSE_FILE=docker-compose.stage.yaml
+        else
+          export COMPOSE_FILE=docker-compose.test.yaml
+        fi
+      else
+        echo already set
+      fi
+      echo COMPOSE_FILE=$COMPOSE_FILE
+    - |
+      if [[ -z "$DOCKER_HOSTS" ]]; then
+        if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
+          export DOCKER_HOSTS=$DOCKER_PROD_HOSTS
+        elif [ "$CI_COMMIT_REF_SLUG" = "develop" ]; then
+          export DOCKER_HOSTS=$DOCKER_TEST_HOSTS
+        else
+          export DOCKER_HOSTS=$DOCKER_TEST_HOSTS
+        fi
+      else
+        echo already set
+      fi
+      echo COMPOSE_FILE=$COMPOSE_FILE
+    - |
+      if [[ -z "$NETWORK" ]]; then
+        export NETWORK=$CI_PROJECT_NAMESPACE
+      else
+        echo already set
+      fi
+      echo NETWORK=$NETWORK
+    - |
+      if [[ -z "$DOCKER_HOSTS" ]]; then
+        export DOCKER_HOSTS='srv5'
+      else
+        echo already set
+      fi
+      echo DOCKER_HOSTS=$DOCKER_HOSTS
+    - |
+      if [[ -z "$DOMAIN" ]]; then
+        export DOMAIN=$CI_BUILD_REF_SLUG.$CI_PROJECT_NAME.$CI_PROJECT_NAMESPACE.$DEMO_DOMAIN
+      else
+        echo already set
+      fi
+      echo DOMAIN=$DOMAIN
+    - |
+      for host in $DOCKER_HOSTS;
+        do export DOCKER_HOST=$host:2375
+        echo deploy to $DOCKER_HOST
+        docker network create $NETWORK || true
+        docker-compose up -d
+      done;
+    - export DYNAMIC_ENVIRONMENT_URL="https://$DOMAIN"
+    - echo "DYNAMIC_ENVIRONMENT_URL=$DYNAMIC_ENVIRONMENT_URL" >> deploy.env
+    - echo "DOCKER_HOSTS=$DOCKER_HOSTS" >> deploy.env
+    - echo "COMPOSE_FILE=$COMPOSE_FILE" >> deploy.env
+  artifacts:
+    reports:
+      dotenv: deploy.env
+
+deploy_compose:
+  extends: .compose_deploy
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    url: $DYNAMIC_ENVIRONMENT_URL
+    on_stop: stop_compose
+    auto_stop_in: 1 week
+    kubernetes:
+      namespace: $DOCKER_HOSTS
+  only:
+    - /^feature.*$/
+  except:
+    - master
+    - develop
+
+stop_compose:
+  image: $CI_TOOLS_REGISTRY/docker-compose
+  variables:
+    GIT_STRATEGY: none
+  when: manual
+  stage: deploy
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    action: stop
+  artifacts:
+    reports:
+      dotenv: deploy.env
+  allow_failure: true
+  script:
+    - |
+      for DOCKER_HOST in $DOCKER_HOSTS;
+        do export DOCKER_HOST
+        docker-compose down
+      done;
+  only:
+    - /^feature.*$/
+
+deploy_compose:
+  extends: .compose_deploy
+  environment:
+    name: staging
+    url: $DYNAMIC_ENVIRONMENT_URL
+    on_stop: stop_compose
+    auto_stop_in: 1 week
+    kubernetes:
+      namespace: $DOCKER_HOSTS
+  only:
+    - develop
+
+deploy_compose:
+  extends: .compose_deploy
+  environment:
+    name: production
+    url: $DYNAMIC_ENVIRONMENT_URL
+    on_stop: stop_compose
+    auto_stop_in: 1 week
+    kubernetes:
+      namespace: $DOCKER_HOSTS
+  only:
+    - master

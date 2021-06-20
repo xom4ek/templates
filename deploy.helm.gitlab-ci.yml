@@ -37,6 +37,8 @@ chart_release:
 .helm_deploy_chart:
   image: $CI_TOOLS_REGISTRY/helm
   stage: deploy
+  tags:
+    - deploy
   script:
     - helm repo add private ${CI_CHART_REGISTRY}
     - |
