@@ -15,6 +15,7 @@ rebuild-mysql:
     - if: '$REBUIILD_MYSQL == "true"'
 
 drop-mysql:
+  image: $CI_TOOLS_REGISTRY/docker-compose
   stage: analyse
   script:
     - docker-compose pull mysql || true
