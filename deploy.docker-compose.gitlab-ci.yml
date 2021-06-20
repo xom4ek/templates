@@ -135,7 +135,7 @@ stop_compose:
   when: manual
   stage: cleanup
   environment:
-    name: review-compose/$CI_COMMIT_REF_SLUG
+    name: review/compose/$CI_COMMIT_REF_SLUG
     action: stop
   artifacts:
     reports:
@@ -155,7 +155,7 @@ stop_compose:
 deploy_compose_staging:
   extends: .compose_deploy
   environment:
-    name: staging-compose
+    name: staging/compose
     url: $DYNAMIC_ENVIRONMENT_URL
     auto_stop_in: 1 week
     kubernetes:
@@ -166,7 +166,7 @@ deploy_compose_staging:
 deploy_compose_production:
   extends: .compose_deploy
   environment:
-    name: production-compose
+    name: production/compose
     url: $DYNAMIC_ENVIRONMENT_URL
     auto_stop_in: 1 week
     kubernetes:
