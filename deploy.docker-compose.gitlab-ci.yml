@@ -118,9 +118,11 @@ stop_compose:
       dotenv: deploy.env
   allow_failure: true
   script:
+    - env
     - |
-      for DOCKER_HOST in $DOCKER_HOSTS;
-        do export DOCKER_HOST
+      for host in $DOCKER_HOSTS;
+        do export DOCKER_HOST=$host:2375
+        echo $DOCKER_HOST
         docker-compose down
       done;
   only:
