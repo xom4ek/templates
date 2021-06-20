@@ -1,0 +1,25 @@
+variables:
+  REBUIILD_MYSQL:
+    value: "false"
+    description: "If you want rebuild (TAKE A LONG TIME) mysql - set to true🌈"
+  DROP_MYSQL:
+    value: "false"
+    description: "If you want drop mysql - set to true🌈"
+
+rebuild-mysql:
+  stage: build
+  trigger:
+    project: 'infra/mysql'
+    strategy: depend
+  rules:
+    - if: '$REBUIILD_MYSQL == "true"'
+
+drop-mysql:
+  stage: analyse
+  script:
+    - docker-compose pull mysql || true
+    - docker-compose stop mysql
+    - docker-compose rm -f mysql
+    - docker-compose up -d mysql
+  rules:
+    - if: '$DROP_MYSQL == "true"'

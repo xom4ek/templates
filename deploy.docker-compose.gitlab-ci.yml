@@ -6,29 +6,25 @@ stages:
   - analyse
   - release
   - deploy
+  - migrate
   - cleanup
 
-.docker_login:
+.docker-login:
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     # - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD_GITLAB $CI_REGISTRY_GITLAB
 
-.docker_proxy_on:
+.docker-proxy-on:
   before_script:
     - mkdir -p $HOME/.docker/
     - 'echo "{ \"proxies\": { \"default\": { \"httpProxy\": \"$HTTP_PROXY\", \"httpsProxy\": \"$HTTPS_PROXY\", \"noProxy\": \"$NO_PROXY\" } } }" > $HOME/.docker/config.json'
 
 .docker-full:
   before_script:
-    - !reference [.docker_proxy_on, before_script]
-    - !reference [.docker_login, before_script]
+    - !reference [.docker-proxy-on, before_script]
+    - !reference [.docker-login, before_script]
 
-.compose_deploy:
-  image: $CI_TOOLS_REGISTRY/docker-compose
-  stage: deploy
-  extends: .docker-full
-  tags:
-    - deploy
+.compose-env:
   script:
     - |
       if [[ -z "$IMAGE" ]]; then
@@ -95,6 +91,15 @@ stages:
         echo already set
       fi
       echo DOMAIN=$DOMAIN
+
+.compose_deploy:
+  image: $CI_TOOLS_REGISTRY/docker-compose
+  stage: deploy
+  extends: .docker-full
+  tags:
+    - deploy
+  script:
+    - !reference [.compose-env, script]
     - |
       for host in $DOCKER_HOSTS;
         do export DOCKER_HOST=$host:2375

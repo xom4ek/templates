@@ -6,6 +6,7 @@ stages:
   - analyse
   - release
   - deploy
+  - migrate
   - cleanup
 
 wiki-test:
