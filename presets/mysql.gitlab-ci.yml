@@ -9,7 +9,7 @@ variables:
 rebuild-mysql:
   stage: build
   trigger:
-    project: '$CI_MYSQL_PROJECT'
+    project: 'infra/mysql'
     strategy: depend
   rules:
     - if: '$REBUILD_MYSQL == "true"'
