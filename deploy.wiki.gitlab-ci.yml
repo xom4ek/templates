@@ -15,7 +15,20 @@ wiki-test:
   stage: test
   allow_failure: true
   script:
-    - envsubst < mkdocs.yml > mkdocs.tmp.yml && mv mkdocs.tmp.yml mkdocs.yml
+    - |
+      if [[ ! -e mkdocs.yml ]];
+      then echo "mkdocs.yml DIDNT EXISTS";
+      cat << EOF >> mkdocs.yml
+      site_name: $CI_PROJECT_PATH_SLUG
+      site_url: $CI_PAGES_URL
+      site_dir: public
+      docs_dir: wiki
+      theme: material
+      nav: []
+      EOF
+      fi;
+    - cat mkdocs.yml | envsubst > mkdocs.tmp.yml
+    - mv mkdocs.tmp.yml mkdocs.yml
     - mkdocs build --strict --verbose --site-dir test
   artifacts:
     paths:
@@ -28,7 +41,20 @@ pages:
   stage: deploy
   allow_failure: true
   script:
-    - envsubst < mkdocs.yml > mkdocs.tmp.yml && mv mkdocs.tmp.yml mkdocs.yml
+    - |
+      if [[ ! -e mkdocs.yml ]];
+      then echo "mkdocs.yml DIDNT EXISTS";
+      cat << EOF >> mkdocs.yml
+      site_name: $CI_PROJECT_PATH_SLUG
+      site_url: $CI_PAGES_URL
+      site_dir: public
+      docs_dir: wiki
+      theme: material
+      nav: []
+      EOF
+      fi;
+    - cat mkdocs.yml | envsubst > mkdocs.tmp.yml
+    - mv mkdocs.tmp.yml mkdocs.yml
     - mkdocs build
   artifacts:
     paths:
