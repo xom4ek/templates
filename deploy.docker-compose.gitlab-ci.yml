@@ -108,6 +108,12 @@ stages:
         docker-compose up -d
       done;
     - export DYNAMIC_ENVIRONMENT_URL="https://$DOMAIN"
+    - |
+      if [[ $DOMAIN =~ "://" ]];
+          then DYNAMIC_ENVIRONMENT_URL="$DOMAIN"
+      else
+          DYNAMIC_ENVIRONMENT_URL="https://$DOMAIN"
+      fi
     - echo "DYNAMIC_ENVIRONMENT_URL=$DYNAMIC_ENVIRONMENT_URL" >> deploy.env
     - echo "DOCKER_HOSTS=$DOCKER_HOSTS" >> deploy.env
     - echo "COMPOSE_FILE=$COMPOSE_FILE" >> deploy.env
