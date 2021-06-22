@@ -115,6 +115,7 @@ stages:
     - echo "IMAGE=$IMAGE" >> deploy.env
     - echo "DOMAIN=$DOMAIN" >> deploy.env
     - echo "COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME" >> deploy.env
+    - echo "NETWORK=$NETWORK" >> deploy.env
   artifacts:
     reports:
       dotenv: deploy.env
