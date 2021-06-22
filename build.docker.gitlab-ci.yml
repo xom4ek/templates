@@ -36,6 +36,7 @@ stages:
   tags:
     - docker
   script:
+    - set -vx
     - |
       if ! docker info &>/dev/null; then
         if [ -z "$DOCKER_HOST" ] && [ "$KUBERNETES_PORT" ]; then
