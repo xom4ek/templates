@@ -79,19 +79,18 @@ stages:
       fi
       echo NETWORK=$NETWORK
     - |
-      if [[ -z "$DOCKER_HOSTS" ]]; then
-        export DOCKER_HOSTS='srv5'
-      else
-        echo already set
-      fi
-      echo DOCKER_HOSTS=$DOCKER_HOSTS
-    - |
       if [[ -z "$DOMAIN" ]]; then
-        export DOMAIN=$CI_BUILD_REF_SLUG.$CI_PROJECT_NAME.$CI_PROJECT_NAMESPACE.$DEMO_DOMAIN
+        if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ] && [ ! -z "$DOMAIN_PROD" ]; then
+          export DOMAIN=$DOMAIN_PROD
+        elif [ "$CI_COMMIT_REF_SLUG" = "develop" ] && [ ! -z "$DOMAIN_STAGE" ]; then
+          export DOMAIN=$DOMAIN_STAGE
+        else
+          export DOMAIN=$CI_BUILD_REF_SLUG.$CI_PROJECT_NAME.$CI_PROJECT_NAMESPACE.$DEMO_DOMAIN
+        fi
       else
         echo already set
       fi
-      echo DOMAIN=$DOMAIN
+    - echo DOMAIN=$DOMAIN
 
 .compose_deploy:
   image: $CI_TOOLS_REGISTRY/docker-compose
