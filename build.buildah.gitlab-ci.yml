@@ -1,0 +1,110 @@
+---
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+  - migrate
+  - validate
+  - cleanup
+
+.buildah_login:
+  before_script:
+    - export REGISTRY_AUTH_FILE=${HOME}/auth.json
+    - buildah login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    # - buildah login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD_GITLAB $CI_REGISTRY_GITLAB
+
+.buildah_proxy_on:
+  before_script:
+    - mkdir -p $HOME/.docker/
+    - 'echo "{ \"proxies\": { \"default\": { \"httpProxy\": \"$HTTP_PROXY\", \"httpsProxy\": \"$HTTPS_PROXY\", \"noProxy\": \"$NO_PROXY\" } } }" > $HOME/.docker/config.json'
+
+.buildah-full:
+  before_script:
+    - !reference [.buildah_proxy_on, before_script]
+    - !reference [.buildah_login, before_script]
+
+.buildah_build:
+  variables:
+    DOCKERFILE: ./Dockerfile
+    BUILD_MULTISTAGE: 1
+    STORAGE_DRIVER: vfs
+    BUILDAH_FORMAT: docker
+  extends: .buildah-full
+  stage: build
+  image: $CI_TOOLS_REGISTRY/buildah
+  tags:
+    - docker
+  script:
+    - set -vx
+    - |
+      DOCKERFILE_NAME=${DOCKERFILE##*/}
+      DOCKERFILE_DIR=${DOCKERFILE%/*}
+      if [ -z "$image_postfix" ]; then
+          image_postfix="/${DOCKERFILE_NAME%.*}"
+          if [ $image_postfix == "/Dockerfile" ] || [ $image_postfix == "/dockerfile" ] ; then
+          image_postfix=""
+          fi
+      fi
+    - echo $DOCKERFILE_DIR
+    - echo $DOCKERFILE_NAME
+    - echo $image_postfix
+    - export CI_APP_REGISTRY=$CI_REGISTRY_IMAGE$image_postfix
+    - export CI_COMMIT_BEFORE_SHORT_SHA=$(echo $CI_COMMIT_BEFORE_SHA | head -c8)
+    - |
+      if [ "${BUILD_MULTISTAGE}" == "1"  ] ; then
+        image_builder_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHORT_SHA-builder"
+        image_builder_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHORT_SHA-builder"
+        image_builder_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_SLUG-builder"
+        if [[ -z "$CI_COMMIT_TAG" ]]; then
+          image_builder_tagged=$image_builder_sha
+        else
+          image_builder_tagged=$image_builder_ref
+        fi
+        buildah pull "$image_builder_before" || \
+        buildah pull "$image_builder_ref" || \
+        true
+        buildah bud \
+          --cache-from "$image_builder_before" \
+          --cache-from "$image_builder_ref" \
+          --target builder \
+          --build-arg SSH_KEY="$GITLAB_SSH_KEY" \
+          $BUILD_EXTRA_ARGS \
+          --tag "$image_builder_tagged" \
+          --tag "$image_builder_ref" \
+          --file $DOCKERFILE .
+          buildah push "$image_builder_tagged"
+          buildah push "$image_builder_ref"
+        BUILD_EXTRA_ARGS="$BUILD_EXTRA_ARGS --cache-from \"$image_builder_ref\""
+      fi
+    - image_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHORT_SHA"
+    - image_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHORT_SHA"
+    - image_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_SLUG"
+    - image_latest="$CI_APP_REGISTRY:latest"
+    - |
+      if [[ -z "$CI_COMMIT_TAG" ]]; then
+        image_tagged=$image_sha
+      else
+        image_tagged=$image_ref
+      fi
+    - |
+      buildah bud \
+        --cache-from "$image_before" \
+        --cache-from "$image_ref" \
+          --build-arg SSH_KEY="$GITLAB_SSH_KEY" \
+        $BUILD_EXTRA_ARGS \
+        --tag "$image_tagged" \
+        --tag "$image_ref" \
+        --file $DOCKERFILE $DOCKERFILE_DIR
+    - buildah push "$image_tagged"
+    - buildah push "$image_ref"
+    - |
+      if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ] || [ -n "$CI_COMMIT_TAG" ]; then
+        buildah tag "$image_tagged" "$image_latest"
+        buildah push "$image_latest"
+      fi
+
+build:
+  extends: .buildah_build
