@@ -101,7 +101,7 @@ stages:
     - |
       if [ "$BUILDAH_SQUASH" = "true" ]; then
         BUILDAH_CONTAINER_ID=$(buildah from $image_tagged)
-        buildah commit --squash $CONTAINER_ID $image_tagged\-tmp
+        buildah commit --squash $BUILDAH_CONTAINER_ID $image_tagged\-tmp
         buildah tag $image_tagged\-tmp $image_tagged
         buildah tag $image_tagged\-tmp $image_ref
       fi
