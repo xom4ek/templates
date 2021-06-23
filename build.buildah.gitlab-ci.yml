@@ -75,8 +75,8 @@ stages:
           --tag "$image_builder_tagged" \
           --tag "$image_builder_ref" \
           --file $DOCKERFILE .
-          buildah push "$image_builder_tagged"
-          buildah push "$image_builder_ref"
+          for i in 1 2 3; do buildah push "$image_builder_tagged" && break || sleep 5; done
+          for i in 1 2 3; do buildah push "$image_builder_ref" && break || sleep 5; done
         BUILD_EXTRA_ARGS="$BUILD_EXTRA_ARGS --cache-from \"$image_builder_ref\""
       fi
     - image_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHORT_SHA"
@@ -105,12 +105,12 @@ stages:
         buildah tag $image_tagged\-tmp $image_tagged
         buildah tag $image_tagged\-tmp $image_ref
       fi
-    - buildah push "$image_tagged"
-    - buildah push "$image_ref"
+    - for i in 1 2 3; do buildah push "$image_tagged" && break || sleep 5; done
+    - for i in 1 2 3; do buildah push "$image_ref" && break || sleep 5; done
     - |
       if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ] || [ -n "$CI_COMMIT_TAG" ]; then
         buildah tag "$image_tagged" "$image_latest"
-        buildah push "$image_latest"
+        for i in 1 2 3; do buildah push "$image_latest" && break || sleep 5; done
       fi
 
 build:
