@@ -32,7 +32,7 @@ stages:
     BUILD_MULTISTAGE: 1
     STORAGE_DRIVER: vfs
     BUILDAH_FORMAT: docker
-    BUILDAH_SQUASH: false
+    BUILDAH_SQUASH: 'false'
   extends: .buildah-full
   stage: build
   image: $CI_TOOLS_REGISTRY/buildah
