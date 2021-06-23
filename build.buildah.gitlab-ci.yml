@@ -32,6 +32,7 @@ stages:
     BUILD_MULTISTAGE: 1
     STORAGE_DRIVER: vfs
     BUILDAH_FORMAT: docker
+    BUILDAH_SQUASH: false
   extends: .buildah-full
   stage: build
   image: $CI_TOOLS_REGISTRY/buildah
@@ -98,6 +99,13 @@ stages:
         --tag "$image_tagged" \
         --tag "$image_ref" \
         --file $DOCKERFILE $DOCKERFILE_DIR
+    - |
+      if [ "$BUILDAH_SQUASH" = "true" ]; then
+        BUILDAH_CONTAINER_ID=$(buildah from $image_tagged)
+        buildah commit --squash $CONTAINER_ID $image_tagged\-tmp
+        buildah tag $image_tagged\-tmp $image_tagged
+        buildah tag $image_tagged\-tmp $image_ref
+      fi
     - buildah push "$image_tagged"
     - buildah push "$image_ref"
     - |
