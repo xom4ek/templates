@@ -1,0 +1,11 @@
+---
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+  - migrate
+  - validate
+  - cleanup

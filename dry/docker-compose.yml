@@ -1,0 +1,69 @@
+include:
+  - dry/docker-login.yml
+
+.compose-env:
+  script:
+    - |
+      if [[ -z "$IMAGE" ]]; then
+        export IMAGE=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+      else
+        echo already set IMAGE
+      fi
+      echo IMAGE=$IMAGE
+    - |
+      if [[ -z "$COMPOSE_PROJECT_NAME" ]]; then
+        if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
+          export COMPOSE_PROJECT_NAME=$CI_PROJECT_PATH_SLUG
+        else
+          export COMPOSE_PROJECT_NAME=$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
+        fi
+      else
+        echo already set COMPOSE_PROJECT_NAME
+      fi
+      echo COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME
+    - |
+      if [[ -z "$COMPOSE_FILE" ]]; then
+        if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
+          export COMPOSE_FILE=docker-compose.prod.yaml
+        elif [ "$CI_COMMIT_REF_SLUG" = "develop" ]; then
+          export COMPOSE_FILE=docker-compose.stage.yaml
+        else
+          export COMPOSE_FILE=docker-compose.test.yaml
+        fi
+      else
+        echo already set
+      fi
+      echo COMPOSE_FILE=$COMPOSE_FILE
+    - |
+      if [[ -z "$DOCKER_HOSTS" ]]; then
+        if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
+          export DOCKER_HOSTS=$DOCKER_PROD_HOSTS
+        elif [ "$CI_COMMIT_REF_SLUG" = "develop" ]; then
+          export DOCKER_HOSTS=$DOCKER_TEST_HOSTS
+        else
+          export DOCKER_HOSTS=$DOCKER_TEST_HOSTS
+        fi
+      else
+        echo already set
+      fi
+      echo COMPOSE_FILE=$COMPOSE_FILE
+    - |
+      if [[ -z "$NETWORK" ]]; then
+        export NETWORK=$CI_PROJECT_NAMESPACE
+      else
+        echo already set
+      fi
+      echo NETWORK=$NETWORK
+    - |
+      if [[ -z "$DOMAIN" ]]; then
+        if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ] && [ ! -z "$DOMAIN_PROD" ]; then
+          export DOMAIN=$DOMAIN_PROD
+        elif [ "$CI_COMMIT_REF_SLUG" = "develop" ] && [ ! -z "$DOMAIN_STAGE" ]; then
+          export DOMAIN=$DOMAIN_STAGE
+        else
+          export DOMAIN=$CI_BUILD_REF_SLUG.$CI_PROJECT_NAME.$CI_PROJECT_NAMESPACE.$DEMO_DOMAIN
+        fi
+      else
+        echo already set
+      fi
+    - echo DOMAIN=$DOMAIN
