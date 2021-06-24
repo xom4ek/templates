@@ -34,8 +34,9 @@ wiki-test:
   artifacts:
     paths:
       - test
-  except:
-    - master
+  rules:
+    - if: $CI_COMMIT_REF_NAME == master
+      when: never
 
 pages:
   image: $CI_TOOLS_REGISTRY/wiki
@@ -60,5 +61,5 @@ pages:
   artifacts:
     paths:
       - public
-  only:
-    - master
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master"

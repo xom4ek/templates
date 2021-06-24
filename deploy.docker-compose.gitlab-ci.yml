@@ -134,11 +134,8 @@ deploy_compose:
     auto_stop_in: 1 week
     kubernetes:
       namespace: $DOCKER_HOSTS
-  only:
-    - /^feature.*$/
-  except:
-    - master
-    - develop
+  rules:
+    - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "develop"
 
 stop_compose:
   image: $CI_TOOLS_REGISTRY/docker-compose
@@ -161,8 +158,8 @@ stop_compose:
         echo $DOCKER_HOST
         docker-compose down
       done;
-  only:
-    - /^feature.*$/
+  rules:
+    - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "develop"
 
 deploy_compose_staging:
   extends: .compose_deploy
@@ -171,8 +168,8 @@ deploy_compose_staging:
     url: $DYNAMIC_ENVIRONMENT_URL
     kubernetes:
       namespace: $DOCKER_HOSTS
-  only:
-    - develop
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "develop"
 
 deploy_compose_production:
   extends: .compose_deploy
@@ -181,5 +178,5 @@ deploy_compose_production:
     url: $DYNAMIC_ENVIRONMENT_URL
     kubernetes:
       namespace: $DOCKER_HOSTS
-  only:
-    - master
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master"

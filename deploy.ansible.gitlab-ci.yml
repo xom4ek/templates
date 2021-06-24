@@ -10,9 +10,8 @@
     - cd ${ANS_ROOT}
     - ansible-galaxy install -r requirements.yml
     - ansible-playbook -vvv --syntax-check -i inventory -l $ANS_ENV --vault-password-file $ANSIBLE_VAULT_PASSWORD_FILE --private-key $ANSIBLE_SSH_KEY --user root playbook.yaml
-  only:
-    changes:
-      - ansible/**/*
+  rules:
+    - changes: ${ANS_ROOT}/**/*
 
 .ans-plan:
   stage: plan
@@ -32,12 +31,9 @@
       - ${ANS_ROOT}/ansible_test.diff
   tags:
     - deploy
-  except:
-    refs:
-      - master
-  only:
-    changes:
-      - ansible/**/*
+  rules:
+    - if: $CI_COMMIT_REF_NAME !- "master"
+      changes: ${ANS_ROOT}/**/*
 
 .ans-roles:
   stage: deploy-ans
@@ -54,8 +50,6 @@
     - ansible-playbook -i inventory -l $ANS_ENV --vault-password-file $ANSIBLE_VAULT_PASSWORD_FILE --private-key $ANSIBLE_SSH_KEY --user root playbook.yaml
   tags:
     - deploy
-  only:
-    refs:
-      - master
-    changes:
-      - ansible/**/*
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master"
+      changes: ${ANS_ROOT}/**/*

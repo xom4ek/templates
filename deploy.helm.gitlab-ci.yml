@@ -68,11 +68,8 @@ deploy_helm:
     auto_stop_in: 1 week
     kubernetes:
       namespace: $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
-  only:
-    - /^feature.*$/
-  except:
-    - master
-    - develop
+  rules:
+    - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "develop"
 
 stop_helm:
   image: $CI_TOOLS_REGISTRY/helm
@@ -90,8 +87,8 @@ stop_helm:
   script:
     - helm uninstall $CI_PROJECT_PATH_SLUG --namespace $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
     - kubectl delete namespace $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
-  only:
-    - /^feature.*$/
+  rules:
+    - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "develop"
 
 deploy_helm_staging:
   extends: .helm_deploy_chart
@@ -100,8 +97,8 @@ deploy_helm_staging:
     url: $DYNAMIC_ENVIRONMENT_URL
     kubernetes:
       namespace: staging
-  only:
-    - develop
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "develop"
 
 deploy_helm_production:
   extends: .helm_deploy_chart
@@ -110,5 +107,5 @@ deploy_helm_production:
     url: $DYNAMIC_ENVIRONMENT_URL
     kubernetes:
       namespace: production
-  only:
-    - master
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master"
