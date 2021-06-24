@@ -5,7 +5,11 @@ include:
     file: 'build.docker.gitlab-ci.yml'
   - project: 'ci-cd/templates'
     ref: master
-    file: 'deploy.docker-compose.gitlab-ci.yml'
+    file: 'test.docker-compose.gitlab-ci.yml'
   - project: 'ci-cd/templates'
     ref: master
-    file: 'deploy.wiki.gitlab-ci.yml'
+    file: 'deploy.docker-compose.gitlab-ci.yml'
+
+wiki:
+  trigger:
+    include: deploy.wiki.gitlab-ci.yml

@@ -10,10 +10,6 @@ stages:
   - validate
   - cleanup
 
-variables:
-  TEST_TARGET: api
-  TEST_COMMAND: echo Specify test command please!
-
 .compose-env:
   script:
     - |
@@ -23,17 +19,6 @@ variables:
         echo already set IMAGE
       fi
       echo IMAGE=$IMAGE
-    - |
-      if [[ -z "$COMPOSE_PROJECT_NAME" ]]; then
-        if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
-          export COMPOSE_PROJECT_NAME=$CI_PROJECT_PATH_SLUG
-        else
-          export COMPOSE_PROJECT_NAME=$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
-        fi
-      else
-        echo already set COMPOSE_PROJECT_NAME
-      fi
-      echo COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME
     - |
       if [[ -z "$COMPOSE_FILE" ]]; then
         if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
@@ -79,11 +64,40 @@ variables:
       else
         echo already set
       fi
-    - echo DOMAIN=$DOMAIN
+      echo DOMAIN=$DOMAIN
+    - |
+      if [[ -z "$COMPOSE_PROJECT_NAME" ]]; then
+        if [ "$CI_COMMIT_REF_SLUG" = "main" ] || [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
+          export COMPOSE_PROJECT_NAME=$CI_PROJECT_PATH_SLUG
+        else
+          export COMPOSE_PROJECT_NAME=$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
+        fi
+      else
+        echo already set COMPOSE_PROJECT_NAME
+      fi
+      UUID=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 32 | head -n 1)
+      COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME-$UUID
+      echo COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME
 
-test:
+.compose_test:
   image: $CI_TOOLS_REGISTRY/docker-compose
   stage: test
+  variables:
+    COMPOSE_FILE: docker-compose.test.yaml
+  extends: .docker-full
+  tags:
+    - test
   script:
     - !reference [.compose-env, script]
-    - date
+    - docker-compose run --rm $TEST_TARGET sh -c "sleep 10 && $TEST_COMMAND" && touch success
+    - docker-compose down
+    - |
+      if [[ -e success ]]; then
+        echo Test success!
+      else
+        echo Test failed!
+        exit 1
+      fi
+
+test_compose:
+  extends: .compose_test
