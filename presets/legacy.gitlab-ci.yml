@@ -25,3 +25,4 @@ wiki:
     include:
       - project: 'ci-cd/templates'
         file: 'deploy.wiki.gitlab-ci.yml'
+  allow_failure: true

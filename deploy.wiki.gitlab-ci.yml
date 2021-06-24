@@ -35,7 +35,7 @@ wiki-test:
     paths:
       - test
   rules:
-    - if: $CI_COMMIT_REF_NAME == "master"
+    - if: $CI_COMMIT_BRANCH == "master"
       when: never
 
 pages:
@@ -62,4 +62,4 @@ pages:
     paths:
       - public
   rules:
-    - if: $CI_COMMIT_REF_NAME == "master"
+    - if: $CI_COMMIT_BRANCH == "master"

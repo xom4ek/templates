@@ -51,4 +51,4 @@ apply:
     - plan
   when: manual
   rules:
-    - if: $CI_COMMIT_REF_NAME == "master"
+    - if: $CI_COMMIT_BRANCH == "master"
