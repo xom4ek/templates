@@ -113,5 +113,5 @@ stages:
         for i in 1 2 3; do buildah push "$image_latest" && break || sleep 5; done
       fi
 
-build:
+build_buildah:
   extends: .buildah_build

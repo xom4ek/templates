@@ -111,5 +111,5 @@ stages:
         docker push "$image_latest"
       fi
 
-build:
+build_docker:
   extends: .docker_build

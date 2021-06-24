@@ -10,7 +10,6 @@ stages:
   - validate
   - cleanup
 
-
 variables:
   LINT_ENABLED: 'true'
   LINT_COMMAND: echo "Specify lint command for this job!"

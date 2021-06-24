@@ -9,6 +9,9 @@ include:
   - project: 'ci-cd/templates'
     ref: master
     file: 'deploy.docker-compose.gitlab-ci.yml'
+  - project: 'ci-cd/templates'
+    ref: master
+    file: 'test.lint.gitlab-ci.yml'
 
 wiki:
   trigger:
