@@ -1,0 +1,11 @@
+---
+include:
+  - project: 'ci-cd/templates'
+    ref: master
+    file: 'build.docker.gitlab-ci.yml'
+  - project: 'ci-cd/templates'
+    ref: master
+    file: 'deploy.docker-compose.gitlab-ci.yml'
+  - project: 'ci-cd/templates'
+    ref: master
+    file: 'deploy.wiki.gitlab-ci.yml'

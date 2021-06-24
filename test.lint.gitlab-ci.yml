@@ -1,0 +1,24 @@
+---
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+  - migrate
+  - validate
+  - cleanup
+
+variables:
+  LINT_ENABLED: 'true'
+  LINT_COMMAND: echo "Specify lint command for this job!"
+
+lint:
+  stage: test
+  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  script:
+    - set -vx
+    - $LINT_COMMAND
+  rules:
+    - if: '$LINT_ENABLED'

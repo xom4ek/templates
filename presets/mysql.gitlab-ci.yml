@@ -5,7 +5,8 @@ variables:
   DROP_MYSQL:
     value: "false"
     description: "If you want drop mysql - set to true🌈"
-
+  MIGRATE_COMMAND: python manage.py migrate --noinput
+  MIGRATION_TARGET: api
 rebuild-mysql:
   stage: build
   trigger:
@@ -23,5 +24,6 @@ drop-mysql:
     - docker-compose stop mysql
     - docker-compose rm -f mysql
     - docker-compose up -d mysql
+    - docker-compose exec -T $MIGRATION_TARGET sh -c "sleep 10 && $MIGRATE_COMMAND"
   rules:
     - if: '$DROP_MYSQL == "true"'

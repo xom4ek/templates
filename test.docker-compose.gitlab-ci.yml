@@ -1,0 +1,22 @@
+---
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+  - migrate
+  - validate
+  - cleanup
+
+variables:
+  TEST_TARGET: api
+  TEST_COMMAND: pytest channel_costs/tests
+
+test:
+  image: $CI_TOOLS_REGISTRY/docker-compose
+  stage: test
+  script:
+    - !reference [.compose-env, script]
+    - date
