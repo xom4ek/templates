@@ -30,7 +30,7 @@ variables:
   TEST_COMMAND: echo Specify test command!
   TEST_TARGET: specify_test_target
 
-.compose-env:
+.compose-env-test:
   script:
     - set -vx
     - |
@@ -109,7 +109,7 @@ variables:
   tags:
     - test
   script:
-    - !reference [.compose-env, script]
+    - !reference [.compose-env-test, script]
     - docker-compose run --rm $TEST_TARGET sh -c "sleep 10 && $TEST_COMMAND" && touch success
     - docker-compose down
     - |
