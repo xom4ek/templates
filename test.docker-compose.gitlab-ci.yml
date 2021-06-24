@@ -100,7 +100,7 @@ stages:
   stage: test
   variables:
     COMPOSE_FILE: docker-compose.test.yaml
-  extends: .docker-full
+  extends: .docker_full
   tags:
     - test
   script:

@@ -8,7 +8,6 @@ yamllint:
   script:
     - yamllint .
 
-include:
-  - project: '$CI_PROJECT_NAMESPACE/templates'
-    ref: master
-    file: 'deploy.wiki.gitlab-ci.yml'
+wiki:
+  trigger:
+    include: deploy.wiki.gitlab-ci.yml

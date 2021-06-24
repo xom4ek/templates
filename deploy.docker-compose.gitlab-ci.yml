@@ -95,7 +95,7 @@ stages:
 .compose_deploy:
   image: $CI_TOOLS_REGISTRY/docker-compose
   stage: deploy
-  extends: .docker-full
+  extends: .docker_full
   tags:
     - deploy
   script:
