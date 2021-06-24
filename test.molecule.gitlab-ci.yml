@@ -1,6 +1,15 @@
 ---
-include:
-  - dry/stages.yml
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+  - migrate
+  - validate
+  - cleanup
+
 
 .docker_login:
   before_script:
@@ -12,14 +21,14 @@ include:
     - mkdir -p $HOME/.docker/
     - 'echo "{ \"proxies\": { \"default\": { \"httpProxy\": \"$HTTP_PROXY\", \"httpsProxy\": \"$HTTPS_PROXY\", \"noProxy\": \"$NO_PROXY\" } } }" > $HOME/.docker/config.json'
 
-.docker-full:
+.docker_full:
   before_script:
     - !reference [.docker_proxy_on, before_script]
     - !reference [.docker_login, before_script]
 
 molecule-role-common:
   extends:
-    - .docker-full
+    - .docker_full
   image: $CI_TOOLS_REGISTRY/ansible-toolset
   stage: test
   tags:

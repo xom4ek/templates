@@ -1,6 +1,15 @@
 ---
-include:
-  - dry/stages.yml
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+  - migrate
+  - validate
+  - cleanup
+
 
 wiki-test:
   image: $CI_TOOLS_REGISTRY/wiki

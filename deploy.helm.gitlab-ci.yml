@@ -1,6 +1,15 @@
 ---
-include:
-  - dry/stages.yml
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+  - migrate
+  - validate
+  - cleanup
+
 
 include:
   - build.helm.gitlab-ci.yml

@@ -1,6 +1,14 @@
 ---
-include:
-  - dry/stages.yml
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+  - migrate
+  - validate
+  - cleanup
 
 .buildah_login:
   before_script:
@@ -13,7 +21,7 @@ include:
     - mkdir -p $HOME/.docker/
     - 'echo "{ \"proxies\": { \"default\": { \"httpProxy\": \"$HTTP_PROXY\", \"httpsProxy\": \"$HTTPS_PROXY\", \"noProxy\": \"$NO_PROXY\" } } }" > $HOME/.docker/config.json'
 
-.buildah-full:
+.buildah_full:
   before_script:
     - !reference [.buildah_proxy_on, before_script]
     - !reference [.buildah_login, before_script]
@@ -24,7 +32,7 @@ include:
     BUILD_MULTISTAGE: 1
     STORAGE_DRIVER: vfs
     BUILDAH_FORMAT: docker
-  extends: .buildah-full
+  extends: .buildah_full
   stage: build
   image: $CI_TOOLS_REGISTRY/buildah
   tags:

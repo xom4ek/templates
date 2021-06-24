@@ -1,6 +1,15 @@
 ---
-include:
-  - dry/stages.yml
+stages:
+  - check
+  - build
+  - test
+  - analyse
+  - release
+  - deploy
+  - migrate
+  - validate
+  - cleanup
+
 
 .helm_pulbish_chart:
   image: $CI_TOOLS_REGISTRY/helm
