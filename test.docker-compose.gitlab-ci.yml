@@ -26,8 +26,13 @@ stages:
     - !reference [.docker_proxy_on, before_script]
     - !reference [.docker_login, before_script]
 
+variables:
+  TEST_COMMAND: echo Specify test command!
+  TEST_TARGET: specify_test_target
+
 .compose-env:
   script:
+    - set -vx
     - |
       if [[ -z "$IMAGE" ]]; then
         export IMAGE=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
@@ -91,8 +96,8 @@ stages:
       else
         echo already set COMPOSE_PROJECT_NAME
       fi
-      UUID=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 32 | head -n 1)
-      COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME-$UUID
+      export UUID=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 32 | head -n 1)
+      export COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME-$UUID
       echo COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME
 
 .compose_test:

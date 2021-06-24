@@ -5,8 +5,9 @@ variables:
   DROP_MYSQL:
     value: "false"
     description: "If you want drop mysql - set to true🌈"
-  MIGRATE_COMMAND: python manage.py migrate --noinput
-  MIGRATION_TARGET: api
+  MIGRATE_COMMAND: echo Specify MIGRATE_COMMAND!
+  MIGRATION_TARGET: specify_MIGRATION_TARGET
+
 rebuild-mysql:
   stage: build
   trigger:

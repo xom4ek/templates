@@ -15,4 +15,6 @@ include:
 
 wiki:
   trigger:
-    include: deploy.wiki.gitlab-ci.yml
+    include:
+      - project: 'ci-cd/templates'
+        file: 'deploy.wiki.gitlab-ci.yml'
