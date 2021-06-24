@@ -141,7 +141,6 @@ stop_compose:
   image: $CI_TOOLS_REGISTRY/docker-compose
   variables:
     GIT_STRATEGY: none
-  when: manual
   stage: cleanup
   environment:
     name: review/compose/$CI_COMMIT_REF_SLUG
@@ -160,6 +159,7 @@ stop_compose:
       done;
   rules:
     - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "develop"
+      when: manual
 
 deploy_compose_staging:
   extends: .compose_deploy
