@@ -1,14 +1,6 @@
 ---
-stages:
-  - check
-  - build
-  - test
-  - analyse
-  - release
-  - deploy
-  - migrate
-  - validate
-  - cleanup
+include:
+  - dry/stages.yml
 
 .docker_login:
   before_script:

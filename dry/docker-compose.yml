@@ -1,3 +1,4 @@
+---
 include:
   - dry/docker-login.yml
 
