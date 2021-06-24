@@ -31,11 +31,8 @@ wiki-test:
     - cat mkdocs.yml | envsubst > mkdocs.tmp.yml
     - mv mkdocs.tmp.yml mkdocs.yml
     - mkdocs build --strict --verbose --site-dir test
-  artifacts:
-    paths:
-      - test
-  rules:
-    - if: $CI_COMMIT_BRANCH != "master"
+  # rules:
+  #   - if: $CI_COMMIT_BRANCH != "master"
 
 pages:
   image: $CI_TOOLS_REGISTRY/wiki
