@@ -40,16 +40,22 @@ stages:
   script:
     - set -vx
     - |
-      DOCKERFILE_NAME=${DOCKERFILE##*/}
-      DOCKERFILE_DIR=${DOCKERFILE%/*}
+      if [[ -z "$DOCKERFILE_DIR" ]]; then
+        export DOCKERFILE_DIR=${DOCKERFILE%/*}
+      else
+        echo already set DOCKERFILE_DIR
+      fi
+      echo DOCKERFILE_DIR=$DOCKERFILE_DIR
+    - |
       if [ -z "$image_postfix" ]; then
+          DOCKERFILE_NAME=${DOCKERFILE##*/}
           image_postfix="/${DOCKERFILE_NAME%.*}"
           if [ $image_postfix == "/Dockerfile" ] || [ $image_postfix == "/dockerfile" ] ; then
           image_postfix=""
           fi
       fi
     - echo $DOCKERFILE_DIR
-    - echo $DOCKERFILE_NAME
+    - echo $DOCKERFILE
     - echo $image_postfix
     - export CI_APP_REGISTRY=$CI_REGISTRY_IMAGE$image_postfix
     - export CI_COMMIT_BEFORE_SHORT_SHA=$(echo $CI_COMMIT_BEFORE_SHA | head -c8)
