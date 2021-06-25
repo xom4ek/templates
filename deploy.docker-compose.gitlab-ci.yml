@@ -12,7 +12,7 @@ stages:
 
 variables:
   MIGRATE_COMMAND: ""
-  MIGRATION_TARGET: mysql
+  MIGRATE_TARGET: $CI_PROJECT_NAME
 
 .docker_login:
   before_script:
@@ -74,7 +74,7 @@ variables:
       else
         echo already set
       fi
-      echo COMPOSE_FILE=$COMPOSE_FILE
+      echo DOCKER_HOSTS=$DOCKER_HOSTS
     - |
       if [[ -z "$NETWORK" ]]; then
         export NETWORK=$CI_PROJECT_NAMESPACE
@@ -111,7 +111,7 @@ variables:
         docker network create $NETWORK || true
         docker-compose up -d
         if [[ ! -z "$MIGRATE_COMMAND" ]]; then
-          docker-compose exec -T $MIGRATION_TARGET sh -c "sleep 10 && $MIGRATE_COMMAND"
+          docker-compose exec -T $MIGRATE_TARGET sh -c "sleep 10 && $MIGRATE_COMMAND"
         fi
       done;
     - export DYNAMIC_ENVIRONMENT_URL="https://$DOMAIN"
