@@ -31,8 +31,6 @@ wiki-test:
     - cat mkdocs.yml | envsubst > mkdocs.tmp.yml
     - mv mkdocs.tmp.yml mkdocs.yml
     - mkdocs build --strict --verbose --site-dir test
-  # rules:
-  #   - if: $CI_COMMIT_BRANCH != "master"
 
 pages:
   image: $CI_TOOLS_REGISTRY/wiki
