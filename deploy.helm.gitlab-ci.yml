@@ -59,7 +59,7 @@ include:
     reports:
       dotenv: deploy.env
 
-deploy_helm:
+.deploy_helm:
   extends: .helm_deploy_chart
   environment:
     name: review/k8s/$CI_COMMIT_REF_SLUG
@@ -70,6 +70,9 @@ deploy_helm:
       namespace: $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
   rules:
     - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "develop"
+
+deploy_helm:
+  extends: .deploy_helm
 
 stop_helm:
   image: $CI_TOOLS_REGISTRY/helm

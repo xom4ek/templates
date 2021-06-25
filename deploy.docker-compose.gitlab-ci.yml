@@ -125,7 +125,7 @@ stages:
     reports:
       dotenv: deploy.env
 
-deploy_compose:
+.deploy_compose:
   extends: .compose_deploy
   environment:
     name: review/compose/$CI_COMMIT_REF_SLUG
@@ -136,6 +136,9 @@ deploy_compose:
       namespace: $DOCKER_HOSTS
   rules:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "develop"
+
+deploy_compose:
+  extends: .deploy_compose
 
 stop_compose:
   image: $CI_TOOLS_REGISTRY/docker-compose
