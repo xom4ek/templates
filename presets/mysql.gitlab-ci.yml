@@ -5,8 +5,6 @@ variables:
   DROP_MYSQL:
     value: "false"
     description: "If you want drop mysql - set to true🌈"
-  MIGRATE_COMMAND: echo Specify MIGRATE_COMMAND!
-  MIGRATION_TARGET: $CI_PROJECT_NAME
 
 rebuild-mysql:
   stage: build
@@ -25,6 +23,5 @@ drop-mysql:
     - docker-compose stop mysql
     - docker-compose rm -f mysql
     - docker-compose up -d mysql
-    - docker-compose exec -T $MIGRATION_TARGET sh -c "sleep 10 && $MIGRATE_COMMAND"
   rules:
     - if: '$DROP_MYSQL == "true"'

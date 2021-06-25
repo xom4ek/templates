@@ -10,6 +10,10 @@ stages:
   - validate
   - cleanup
 
+variables:
+  MIGRATE_COMMAND: ""
+  MIGRATION_TARGET: mysql
+
 .docker_login:
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -106,6 +110,9 @@ stages:
         echo deploy to $DOCKER_HOST
         docker network create $NETWORK || true
         docker-compose up -d
+        if [[ ! -z "$MIGRATE_COMMAND" ]]; then
+          docker-compose exec -T $MIGRATION_TARGET sh -c "sleep 10 && $MIGRATE_COMMAND"
+        fi
       done;
     - export DYNAMIC_ENVIRONMENT_URL="https://$DOMAIN"
     - |
@@ -164,7 +171,7 @@ stop_compose:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "develop"
       when: manual
 
-deploy_compose_staging:
+.deploy_compose_staging:
   extends: .compose_deploy
   environment:
     name: staging/compose
@@ -174,7 +181,10 @@ deploy_compose_staging:
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
 
-deploy_compose_production:
+deploy_compose_staging:
+  extends: .deploy_compose_staging
+
+.deploy_compose_production:
   extends: .compose_deploy
   environment:
     name: production/compose
@@ -183,3 +193,6 @@ deploy_compose_production:
       namespace: $DOCKER_HOSTS
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
+
+deploy_compose_production:
+  extends: .deploy_compose_production
