@@ -26,7 +26,7 @@ stages:
     - !reference [.buildah_proxy_on, before_script]
     - !reference [.buildah_login, before_script]
 
-.buildah_build:
+.build:
   variables:
     DOCKERFILE: ./Dockerfile
     BUILD_MULTISTAGE: 1
@@ -113,5 +113,5 @@ stages:
         for i in 1 2 3; do buildah push "$image_latest" && break || sleep 5; done
       fi
 
-build_buildah:
-  extends: .buildah_build
+build:
+  extends: .build

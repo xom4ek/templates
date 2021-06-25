@@ -26,7 +26,7 @@ stages:
     - !reference [.docker_proxy_on, before_script]
     - !reference [.docker_login, before_script]
 
-.docker_build:
+.build:
   variables:
     DOCKER_BUILDKIT: 0
     DOCKERFILE: ./Dockerfile
@@ -111,5 +111,5 @@ stages:
         docker push "$image_latest"
       fi
 
-build_docker:
-  extends: .docker_build
+build:
+  extends: .build
