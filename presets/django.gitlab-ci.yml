@@ -1,0 +1,30 @@
+---
+variables:
+
+  DJANGO_COMMAND:
+    value: ""
+    description: |
+      Имя команды для запуска:
+      <ul>
+          <li>
+              <strong>migrate</strong> - выполняет миграцию данных. Вызывается автоматически после сборки
+          </li>
+          <li>
+              <strong>clear_cache</strong> - сбрасывает кэш
+          </li>
+          <li>
+              <strong>init_repositories</strong> - Инициализирует индексы Elastic
+          </li>
+      </ul>
+
+  DJANGO_COMMAND_EXTRA_ARGS:
+    value: ""
+    description: "Дополнительные параметры для запуска команды.🌈"
+
+django_command:
+  stage: analyse
+  allow_failure: true
+  when: manual
+  script:
+    - !reference [.compose-env, script]
+    - docker-compose exec -T $MIGRATE_TARGET sh -c "LOGGING_LEVEL=ERROR python manage.py $DJANGO_COMMAND $DJANGO_COMMAND_EXTRA_ARGS"
