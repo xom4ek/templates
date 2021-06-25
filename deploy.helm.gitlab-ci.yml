@@ -78,7 +78,6 @@ stop_helm:
   image: $CI_TOOLS_REGISTRY/helm
   variables:
     GIT_STRATEGY: none
-  when: manual
   stage: cleanup
   environment:
     name: review/k8s/$CI_COMMIT_REF_SLUG
@@ -92,6 +91,7 @@ stop_helm:
     - kubectl delete namespace $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
   rules:
     - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "develop"
+      when: manual
 
 deploy_helm_staging:
   extends: .helm_deploy_chart

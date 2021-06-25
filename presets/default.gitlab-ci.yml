@@ -22,6 +22,12 @@ include:
   - project: 'ci-cd/templates'
     ref: master
     file: 'deploy.helm.gitlab-ci.yml'
-  - project: 'ci-cd/templates'
-    ref: master
-    file: 'deploy.wiki.gitlab-ci.yml'
+
+wiki:
+  trigger:
+    include:
+      - project: 'ci-cd/templates'
+        file: 'deploy.wiki.gitlab-ci.yml'
+  allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $WIKI_ENABLED'
