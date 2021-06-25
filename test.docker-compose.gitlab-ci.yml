@@ -27,7 +27,7 @@ stages:
     - !reference [.docker_login, before_script]
 
 variables:
-  TEST_COMMAND: echo Specify test command!
+  # TEST_COMMAND: echo Specify test command!
   TEST_TARGET: $CI_PROJECT_NAME
 
 .compose-env-test:
@@ -119,6 +119,8 @@ variables:
         echo Test failed!
         exit 1
       fi
+  rules:
+    - if: '$TEST_COMMAND'
 
 test_compose:
   extends: .compose_test
