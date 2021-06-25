@@ -1,0 +1,32 @@
+---
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
+include:
+  - project: 'ci-cd/templates'
+    ref: master
+    file: 'build.docker.gitlab-ci.yml'
+  - project: 'ci-cd/templates'
+    ref: master
+    file: 'deploy.helm.gitlab-ci.yml'
+
+wiki:
+  trigger:
+    include:
+      - project: 'ci-cd/templates'
+        file: 'deploy.wiki.gitlab-ci.yml'
+  allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $WIKI_ENABLED'
+
+deploy_helm:
+  rules:
+    when: never
+
+deploy_helm_staging:
+  rules:
+    when: never
