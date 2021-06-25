@@ -74,7 +74,7 @@ include:
 deploy_helm:
   extends: .deploy_helm
 
-stop_helm:
+.stop_helm:
   image: $CI_TOOLS_REGISTRY/helm
   variables:
     GIT_STRATEGY: none
@@ -92,6 +92,9 @@ stop_helm:
   rules:
     - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "develop"
       when: manual
+
+stop_helm:
+  extends: .stop_helm
 
 .deploy_helm_staging:
   extends: .helm_deploy_chart
