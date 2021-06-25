@@ -60,9 +60,9 @@ stages:
     - export CI_COMMIT_BEFORE_SHORT_SHA=$(echo $CI_COMMIT_BEFORE_SHA | head -c8)
     - |
       if [ "${BUILD_MULTISTAGE}" == "1"  ] ; then
-        image_builder_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHORT_SHA-builder"
-        image_builder_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHORT_SHA-builder"
-        image_builder_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_SLUG-builder"
+        image_builder_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHORT_SHA$image_add_tag-builder"
+        image_builder_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHORT_SHA$image_add_tag-builder"
+        image_builder_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_SLUG$image_add_tag-builder"
         if [[ -z "$CI_COMMIT_TAG" ]]; then
           image_builder_tagged=$image_builder_sha
         else
@@ -84,10 +84,10 @@ stages:
           docker push "$image_builder_ref"
         BUILD_EXTRA_ARGS="$BUILD_EXTRA_ARGS --cache-from \"$image_builder_ref\""
       fi
-    - image_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHORT_SHA"
-    - image_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHORT_SHA"
-    - image_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_SLUG"
-    - image_latest="$CI_APP_REGISTRY:latest"
+    - image_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHORT_SHA$image_add_tag"
+    - image_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHORT_SHA$image_add_tag"
+    - image_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_SLUG$image_add_tag"
+    - image_latest="$CI_APP_REGISTRY:latest$image_add_tag"
     - |
       if [[ -z "$CI_COMMIT_TAG" ]]; then
         image_tagged=$image_sha
