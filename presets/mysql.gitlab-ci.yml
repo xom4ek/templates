@@ -6,7 +6,7 @@ variables:
     value: "false"
     description: "If you want drop mysql - set to true🌈"
   MIGRATE_COMMAND: echo Specify MIGRATE_COMMAND!
-  MIGRATION_TARGET: specify_MIGRATION_TARGET
+  MIGRATION_TARGET: $CI_PROJECT_NAME
 
 rebuild-mysql:
   stage: build

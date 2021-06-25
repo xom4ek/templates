@@ -28,7 +28,7 @@ stages:
 
 variables:
   TEST_COMMAND: echo Specify test command!
-  TEST_TARGET: specify_test_target
+  TEST_TARGET: $CI_PROJECT_NAME
 
 .compose-env-test:
   script:
