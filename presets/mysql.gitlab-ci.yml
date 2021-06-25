@@ -19,6 +19,7 @@ drop-mysql:
   stage: analyse
   allow_failure: true
   script:
+    - !reference [.compose-env, script]
     - docker-compose pull mysql || true
     - docker-compose stop mysql
     - docker-compose rm -f mysql
