@@ -122,5 +122,5 @@ variables:
   rules:
     - if: '$TEST_COMMAND'
 
-test_compose:
+compose_test:
   extends: .compose_test

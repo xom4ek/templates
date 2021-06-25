@@ -10,7 +10,7 @@ stages:
   - validate
   - cleanup
 
-lint:
+.lint:
   stage: test
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
   script:
@@ -18,3 +18,6 @@ lint:
     - $LINT_COMMAND
   rules:
     - if: '$LINT_COMMAND'
+
+lint:
+  extends: .lint

@@ -11,7 +11,7 @@ stages:
   - cleanup
 
 
-.helm_pulbish_chart:
+.chart_release:
   image: $CI_TOOLS_REGISTRY/helm
   stage: build
   tags:
@@ -33,4 +33,4 @@ stages:
     - helm push ${CHART_DIR} --version ${chart_ref} ${CI_CHART_REGISTRY}
 
 chart_release:
-  extends: .helm_pulbish_chart
+  extends: .chart_release
