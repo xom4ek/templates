@@ -1,7 +1,11 @@
 ---
+# Only deatach pipeline for MR
 workflow:
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
 
 include:
   - project: 'ci-cd/templates'
@@ -19,14 +23,3 @@ wiki:
   allow_failure: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $WIKI_ENABLED'
-
-chart_release:
-  extends: .chart_release
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"'
-
-deploy_helm:
-  extends: .deploy_helm
-
-stop_helm:
-  extends: .stop_helm
