@@ -89,7 +89,7 @@ stages:
           docker push "$image_builder_tagged"
           docker push "$image_builder_ref"
         BUILD_EXTRA_ARGS="$BUILD_EXTRA_ARGS --cache-from \"$image_builder_ref\""
-      fi
+      fi || echo Build-builder failed
     - image_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHORT_SHA$image_add_tag"
     - image_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHORT_SHA$image_add_tag"
     - image_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_SLUG$image_add_tag"
