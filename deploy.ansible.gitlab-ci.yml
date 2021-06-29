@@ -11,7 +11,8 @@
     - ansible-galaxy install -r requirements.yml
     - ansible-playbook -vvv --syntax-check -i inventory -l $ANS_ENV --vault-password-file $ANSIBLE_VAULT_PASSWORD_FILE --private-key $ANSIBLE_SSH_KEY --user root playbook.yaml
   rules:
-    - changes: ${ANS_ROOT}/**/*
+    - changes:
+        - ${ANS_ROOT}/**/*
 
 .ans-plan:
   stage: plan
@@ -32,8 +33,9 @@
   tags:
     - deploy
   rules:
-    - if: $CI_COMMIT_BRANCH !- "master"
-      changes: ${ANS_ROOT}/**/*
+    - if: '$CI_COMMIT_BRANCH != "master"'
+      changes:
+        - ${ANS_ROOT}/**/*
 
 .ans-roles:
   stage: deploy-ans
@@ -51,6 +53,7 @@
   tags:
     - deploy
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
-      changes: ${ANS_ROOT}/**/*
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - ${ANS_ROOT}/**/*
       when: manual
