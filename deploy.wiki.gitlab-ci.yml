@@ -31,11 +31,11 @@ wiki-test:
     - mkdir -p wiki || true
     - |
       if [[ -e README.md ]]; then
-        ln -s README.md wiki/README.md
+        ln -s ../README.md wiki/README.md
       fi;
     - |
       if [[ -e CHANGELOG.md ]]; then
-        ln -s CHANGELOG.md wiki/CHANGELOG.md
+        ln -s ../CHANGELOG.md wiki/CHANGELOG.md
       fi;
     - cat mkdocs.yml | envsubst > mkdocs.tmp.yml
     - mv mkdocs.tmp.yml mkdocs.yml
@@ -63,11 +63,11 @@ pages:
     - mkdir -p wiki || true
     - |
       if [[ -e README.md ]]; then
-        ln -s README.md wiki/README.md
+        ln -s ../README.md wiki/README.md
       fi;
     - |
       if [[ -e CHANGELOG.md ]]; then
-        ln -s CHANGELOG.md wiki/CHANGELOG.md
+        ln -s ../CHANGELOG.md wiki/CHANGELOG.md
       fi;
     - cat mkdocs.yml | envsubst > mkdocs.tmp.yml
     - mv mkdocs.tmp.yml mkdocs.yml
