@@ -28,9 +28,20 @@ wiki-test:
       nav: []
       EOF
       fi;
+    - mkdir -p wiki || true
+    - |
+      if [[ -e README.md ]]; then
+        ln -s README.md wiki/README.md
+      fi;
+    - |
+      if [[ -e CHANGELOG.md ]]; then
+        ln -s CHANGELOG.md wiki/CHANGELOG.md
+      fi;
     - cat mkdocs.yml | envsubst > mkdocs.tmp.yml
     - mv mkdocs.tmp.yml mkdocs.yml
     - mkdocs build --strict --verbose --site-dir test
+  rules:
+    - if: $CI_COMMIT_BRANCH != "master"
 
 pages:
   image: $CI_TOOLS_REGISTRY/wiki
@@ -48,6 +59,15 @@ pages:
       theme: material
       nav: []
       EOF
+      fi;
+    - mkdir -p wiki || true
+    - |
+      if [[ -e README.md ]]; then
+        ln -s README.md wiki/README.md
+      fi;
+    - |
+      if [[ -e CHANGELOG.md ]]; then
+        ln -s CHANGELOG.md wiki/CHANGELOG.md
       fi;
     - cat mkdocs.yml | envsubst > mkdocs.tmp.yml
     - mv mkdocs.tmp.yml mkdocs.yml
