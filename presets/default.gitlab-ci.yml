@@ -7,14 +7,6 @@ workflow:
       when: never
     - if: '$CI_COMMIT_BRANCH'
 
-# # Only pipeline for branch
-# workflow:
-#   rules:
-#     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#       when: never
-#     - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
-#     - if: '$CI_COMMIT_BRANCH'
-
 include:
   - project: 'ci-cd/templates'
     ref: master
@@ -30,4 +22,4 @@ wiki:
         file: 'deploy.wiki.gitlab-ci.yml'
   allow_failure: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master" && $WIKI_ENABLED'
+    - if: '$CI_COMMIT_BRANCH == "master"'
