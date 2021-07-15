@@ -38,7 +38,7 @@ include:
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
       else
           KUBE_NAMESPACE=$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
-          HELM_CHART=.helm/review
+          HELM_CHART=.helm/preview
           ENVIRONMENT=preview
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.image.tag=$CI_COMMIT_SHORT_SHA --set global.ingress.stagingDomain=$CI_COMMIT_REF_SLUG.$KUBE_BASE_DOMAIN "
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
