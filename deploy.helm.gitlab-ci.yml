@@ -24,18 +24,21 @@ include:
     - |
       if [[ "$CI_COMMIT_REF_SLUG" == "master" ]]; then
           KUBE_NAMESPACE=production
+          HELM_CHART=.helm/release
           ENVIRONMENT=production
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.image.tag=$CI_COMMIT_SHORT_SHA "
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
       elif [[ "$CI_COMMIT_REF_SLUG" == "develop" ]]; then
           KUBE_NAMESPACE=staging
+          HELM_CHART=.helm/release
           ENVIRONMENT=staging
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.image.tag=$CI_COMMIT_SHORT_SHA --set global.ingress.stagingDomain=$KUBE_BASE_DOMAIN "
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
       else
           KUBE_NAMESPACE=$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
+          HELM_CHART=.helm/review
           ENVIRONMENT=preview
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.image.tag=$CI_COMMIT_SHORT_SHA --set global.ingress.stagingDomain=$CI_COMMIT_REF_SLUG.$KUBE_BASE_DOMAIN "
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.podAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
@@ -43,10 +46,10 @@ include:
 
       fi;
     - HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set global.imageCredentials.username=${CI_REGISTRY_USER} --set global.imageCredentials.password=${CI_REGISTRY_PASSWORD} --set global.environment=${ENVIRONMENT} "
+    - set -vx
     - helm upgrade \
         --install $CI_PROJECT_PATH_SLUG \
-        private/$CI_PROJECT_PATH_SLUG \
-        --version 1.0.0-sha$CI_COMMIT_SHORT_SHA \
+        $HELM_CHART \
         --namespace ${KUBE_NAMESPACE} \
         --create-namespace \
         --atomic \

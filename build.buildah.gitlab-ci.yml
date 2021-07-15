@@ -38,7 +38,6 @@ stages:
   tags:
     - docker
   script:
-    - set -vx
     - |
       if [[ -z "$DOCKERFILE_DIR" ]]; then
         export DOCKERFILE_DIR=${DOCKERFILE%/*}
