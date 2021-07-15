@@ -46,6 +46,7 @@ include:
 
       fi;
     - HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set global.imageCredentials.username=${CI_REGISTRY_USER} --set global.imageCredentials.password=${CI_REGISTRY_PASSWORD} --set global.environment=${ENVIRONMENT} "
+    - helm dependency update $HELM_CHART
     - set -vx
     - helm upgrade \
         --install $CI_PROJECT_PATH_SLUG \
