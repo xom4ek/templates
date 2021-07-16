@@ -37,7 +37,6 @@ stages:
   tags:
     - docker
   script:
-    - set -vx
     - |
       if ! docker info &>/dev/null; then
         if [ -z "$DOCKER_HOST" ] && [ "$KUBERNETES_PORT" ]; then
@@ -88,8 +87,8 @@ stages:
           --file $DOCKERFILE .
           docker push "$image_builder_tagged"
           docker push "$image_builder_ref"
-        BUILDER_CACHE="--cache-from $image_builder_ref --cache-from $image_builder_tagged"
-      fi || BUILDER_CACHE=""
+        BUILD_EXTRA_ARGS="$BUILD_EXTRA_ARGS --cache-from $image_builder_ref"
+      fi || echo Build-builder failed
     - image_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHORT_SHA$image_add_tag"
     - image_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHORT_SHA$image_add_tag"
     - image_ref="$CI_APP_REGISTRY:$CI_COMMIT_REF_SLUG$image_add_tag"
@@ -104,7 +103,7 @@ stages:
       docker build \
         --cache-from "$image_before" \
         --cache-from "$image_ref" \
-          --build-arg SSH_KEY="$GITLAB_SSH_KEY" $BUILDER_CACHE\
+          --build-arg SSH_KEY="$GITLAB_SSH_KEY" \
         $BUILD_EXTRA_ARGS \
         --tag "$image_tagged" \
         --tag "$image_ref" \
