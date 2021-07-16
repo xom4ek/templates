@@ -83,7 +83,7 @@ stages:
           --file $DOCKERFILE .
           for i in 1 2 3; do buildah push "$image_builder_tagged" && break || sleep 5; done
           for i in 1 2 3; do buildah push "$image_builder_ref" && break || sleep 5; done
-        BUILD_EXTRA_ARGS="$BUILD_EXTRA_ARGS --cache-from \"$image_builder_ref\""
+        BUILD_EXTRA_ARGS="$BUILD_EXTRA_ARGS --cache-from $image_builder_ref"
       fi
     - image_before="$CI_APP_REGISTRY:$CI_COMMIT_BEFORE_SHORT_SHA"
     - image_sha="$CI_APP_REGISTRY:$CI_COMMIT_SHORT_SHA"
