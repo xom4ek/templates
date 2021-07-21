@@ -56,7 +56,8 @@ include:
         --atomic \
         --timeout 5m \
         $HELM_EXTRA_ARGS
-    - DYNAMIC_ENVIRONMENT_URL=$(helm get notes $CI_PROJECT_PATH_SLUG --namespace ${KUBE_NAMESPACE} | grep -Eo "(http|https)://.+" | head -1)
+    - echo "START=START" >> deploy.env
+    - DYNAMIC_ENVIRONMENT_URL=$(helm get notes $CI_PROJECT_PATH_SLUG --namespace ${KUBE_NAMESPACE} | grep -Eo "(http|https)://.+" | head -1) || true
     - echo "DYNAMIC_ENVIRONMENT_URL=$DYNAMIC_ENVIRONMENT_URL" >> deploy.env
     - echo "KUBE_NAMESPACE=$KUBE_NAMESPACE" >> deploy.env
   artifacts:
