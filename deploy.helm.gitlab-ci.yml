@@ -44,6 +44,7 @@ include:
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
       fi;
     - HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set global.imageCredentials.username=${CI_REGISTRY_USER} --set global.imageCredentials.password=${CI_REGISTRY_PASSWORD} --set global.environment=${ENVIRONMENT} "
+    - cd .helm/preview && for dep in $(helm dep list| grep "file://" | cut -f 3 | sed s#file:/#.#); do  helm dep update $dep; done && cd ../../
     - helm dependency update .helm/release || true
     - helm dependency update .helm/preview || true
     - set -vx
