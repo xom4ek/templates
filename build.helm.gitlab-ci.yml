@@ -32,7 +32,8 @@ stages:
       fi;
     - helm push ${CHART_DIR} --version ${chart_sha} ${CI_CHART_REGISTRY}
     - helm push ${CHART_DIR} --version ${chart_ref} ${CI_CHART_REGISTRY}
-  rules:
-    - if: $CI_CHART_REGISTRY
+
 chart_release:
   extends: .chart_release
+  rules:
+    - if: $CI_CHART_REGISTRY
