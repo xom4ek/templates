@@ -46,7 +46,7 @@ include:
     - HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set global.imageCredentials.username=${CI_REGISTRY_USER} --set global.imageCredentials.password=${CI_REGISTRY_PASSWORD} --set global.environment=${ENVIRONMENT} "
     - helm repo add private ${CI_CHART_REGISTRY} || true
     - ( cd .helm/preview && for dep in $(helm dep list| grep "file://" | cut -f 3 | sed s#file:/#.#); do  helm dep update $dep; done ) || true
-    - cd $CI_BUILDS_DIR
+    - cd $CI_PROJECT_DIR
     - helm dependency update .helm/release || true
     - helm dependency update .helm/preview || true
     - set -vx
