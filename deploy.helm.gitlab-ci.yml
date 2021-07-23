@@ -44,7 +44,7 @@ include:
           HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/app=${CI_PROJECT_PATH_SLUG} --set $CI_PROJECT_PATH_SLUG.$CI_PROJECT_PATH_SLUG.deploymentAnnotations.app\\.gitlab\\.com/env=${CI_ENVIRONMENT_SLUG}"
       fi;
     - HELM_EXTRA_ARGS="$HELM_EXTRA_ARGS --set global.imageCredentials.username=${CI_REGISTRY_USER} --set global.imageCredentials.password=${CI_REGISTRY_PASSWORD} --set global.environment=${ENVIRONMENT} "
-      if [[ -z "$CI_CHART_REGISTRY" ]]; then
+    - if [[ -z "$CI_CHART_REGISTRY" ]]; then
         echo no chart-registry
       else
         helm repo add private ${CI_CHART_REGISTRY}
