@@ -41,7 +41,7 @@ wiki-test:
     - mv mkdocs.tmp.yml mkdocs.yml
     - mkdocs build --strict --verbose --site-dir test
   rules:
-    - if: $CI_COMMIT_BRANCH != "master"
+    - if: $CI_COMMIT_BRANCH != "develop"
 
 pages:
   image: $CI_TOOLS_REGISTRY/wiki
@@ -76,4 +76,4 @@ pages:
     paths:
       - public
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "develop"
