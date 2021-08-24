@@ -21,7 +21,7 @@ include:
     - deploy
   script:
     - |
-      if [[ "$CI_COMMIT_REF_SLUG" == "master" ]]; then
+      if [[ "$CI_COMMIT_REF_SLUG" == "master" ||  "$CI_COMMIT_REF_SLUG" == "main" ]]; then
           KUBE_NAMESPACE=production
           HELM_CHART=.helm/release
           ENVIRONMENT=production
@@ -83,7 +83,7 @@ include:
     kubernetes:
       namespace: $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
   rules:
-    - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "develop"
+    - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "develop" && $CI_COMMIT_REF_NAME != "main"
 
 deploy_helm:
   extends: .deploy_helm
@@ -104,7 +104,7 @@ deploy_helm:
     - helm uninstall $CI_PROJECT_PATH_SLUG --namespace $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
     - kubectl delete namespace $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
   rules:
-    - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "develop"
+    - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "develop" && $CI_COMMIT_REF_NAME != "main"
       when: manual
 
 stop_helm:
@@ -131,7 +131,7 @@ deploy_helm_staging:
     kubernetes:
       namespace: production
   rules:
-    - if: $CI_COMMIT_REF_NAME == "master"
+    - if: $CI_COMMIT_REF_NAME == "master" ||  $CI_COMMIT_REF_NAME == "main"
 
 deploy_helm_production:
   extends: .deploy_helm_production
