@@ -63,7 +63,6 @@ include:
         --namespace ${HELM_NAMESPACE} \
         --create-namespace \
         --atomic \
-        --timeout 5m \
         $HELM_EXTRA_ARGS
     - echo "START=START" >> deploy.env
     - DYNAMIC_ENVIRONMENT_URL=$(helm get notes $CI_PROJECT_PATH_SLUG --namespace ${HELM_NAMESPACE} | grep -Eo "(http|https)://.+" | head -1) || true
